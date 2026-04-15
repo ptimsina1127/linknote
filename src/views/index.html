@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LinkNote - Anonymous Notepad</title>
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<nav class="navbar">
+  <a href="/" class="logo">LinkNote</a>
+  <div class="nav-links">
+    <a href="/search">Search</a>
+    <a href="/favorites">Favorites</a>
+  </div>
+</nav>
+<main class="editor-page">
+  <div class="toolbar">
+    <input type="text" id="title-input" class="title-input" placeholder="Title (optional)" maxlength="200">
+    <div class="toolbar-right">
+      <label class="password-toggle">
+        <span class="lock-icon">🔒</span>
+        <input type="checkbox" id="password-enable">
+        <span>Password</span>
+      </label>
+      <input type="password" id="password-input" class="password-input" placeholder="Password (min 4 chars)" disabled>
+      <button id="mic-btn" class="toolbar-btn" title="Speech-to-text (Chrome/Edge only)" style="display:none">🎤</button>
+      <button id="share-btn" class="btn btn-primary">Share</button>
+    </div>
+  </div>
+  <textarea id="note-content" class="note-editor" placeholder="Write your note here..." maxlength="50000"></textarea>
+</main>
+
+<div id="toast" class="toast hidden"></div>
+<div id="result-modal" class="modal hidden">
+  <div class="modal-content">
+    <h2>Note created!</h2>
+    <p>Share this link:</p>
+    <div class="result-link">
+      <input type="text" id="result-url" readonly>
+      <button id="copy-btn" class="btn">Copy</button>
+    </div>
+    <a id="view-note-btn" class="btn btn-primary" target="_blank">View note</a>
+    <button id="create-another" class="btn">Create another</button>
+  </div>
+</div>
+
+<script src="/js/speech.js"></script>
+<script src="/js/app.js"></script>
+</body>
+</html>

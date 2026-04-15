@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Note - LinkNote</title>
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<nav class="navbar">
+  <a href="/" class="logo">LinkNote</a>
+  <div class="nav-links">
+    <a href="/search">Search</a>
+    <a href="/favorites">Favorites</a>
+  </div>
+</nav>
+<main class="note-view-page">
+  <div id="unlock-prompt" class="unlock-prompt hidden">
+    <div class="unlock-box">
+      <h2>This note is password protected</h2>
+      <input type="password" id="unlock-password" placeholder="Enter password">
+      <button id="unlock-btn" class="btn btn-primary">Unlock</button>
+      <p id="unlock-error" class="error hidden">Incorrect password</p>
+    </div>
+  </div>
+  <div id="note-container" class="hidden">
+    <div class="note-toolbar">
+      <h1 id="note-title" class="note-title"></h1>
+      <div class="note-actions">
+        <button id="fav-btn" class="toolbar-btn" title="Favorite">☆</button>
+        <button id="duplicate-btn" class="toolbar-btn" title="Duplicate">📋</button>
+        <button id="download-btn" class="toolbar-btn" title="Download">⬇</button>
+        <button id="copy-link-btn" class="toolbar-btn" title="Copy link">🔗</button>
+      </div>
+    </div>
+    <pre id="note-content" class="note-content"></pre>
+    <p id="note-date" class="note-date"></p>
+  </div>
+</main>
+
+<div id="toast" class="toast hidden"></div>
+
+<script src="/js/favorites.js"></script>
+<script src="/js/note.js"></script>
+</body>
+</html>
