@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Search Notes - LinkNote</title>
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<nav class="navbar">
+  <a href="/" class="logo">LinkNote</a>
+  <div class="nav-links">
+    <a href="/search" class="active">Search</a>
+    <a href="/favorites">Favorites</a>
+  </div>
+</nav>
+<main class="page-center">
+  <h1>Search Notes</h1>
+  <div class="search-bar">
+    <input type="text" id="search-input" placeholder="Search notes..." autofocus>
+    <button id="sort-btn" class="toolbar-btn" title="Toggle sort order">↓ Newest</button>
+  </div>
+  <div id="search-results" class="notes-list">
+    <p class="hint">Start typing to search notes</p>
+  </div>
+  <div id="pagination" class="pagination hidden"></div>
+</main>
+
+<script src="/js/favorites.js"></script>
+<script src="/js/search.js"></script>
+</body>
+</html>
