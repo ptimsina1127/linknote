@@ -74,11 +74,20 @@ function getNoteCount() {
   return db.prepare('SELECT COUNT(*) as total FROM notes WHERE is_protected = 0').get().total;
 }
 
+function updateNote(shortId, title, content) {
+  const stmt = db.prepare(
+    "UPDATE notes SET title = ?, content = ?, updated_at = datetime('now') WHERE short_id = ?"
+  );
+  const result = stmt.run(title, content, shortId);
+  return result.changes > 0;
+}
+
 module.exports = {
   generateShortId,
   createNote,
   getNote,
   verifyPassword,
+  updateNote,
   getRecentNotes,
   searchNotes,
   getNoteCount,

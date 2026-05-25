@@ -13,6 +13,7 @@
     <a href="/search">Search</a>
     <a href="/favorites">Favorites</a>
   </div>
+  <button id="theme-btn" class="toolbar-btn" title="Toggle theme">🌙</button>
 </nav>
 <main class="note-view-page">
   <div id="unlock-prompt" class="unlock-prompt hidden">
@@ -24,22 +25,26 @@
     </div>
   </div>
   <div id="note-container" class="hidden">
-    <div class="note-toolbar">
-      <h1 id="note-title" class="note-title"></h1>
-      <div class="note-actions">
+    <div class="toolbar">
+      <input type="text" id="note-title-input" class="title-input" placeholder="Title (optional)" maxlength="200">
+      <div class="toolbar-right">
+        <button id="mic-btn" class="toolbar-btn" title="Speech-to-text (Chrome/Edge only)" style="display:none">🎤</button>
         <button id="fav-btn" class="toolbar-btn" title="Favorite">☆</button>
         <button id="duplicate-btn" class="toolbar-btn" title="Duplicate">📋</button>
         <button id="download-btn" class="toolbar-btn" title="Download">⬇</button>
         <button id="copy-link-btn" class="toolbar-btn" title="Copy link">🔗</button>
+        <button id="save-btn" class="btn btn-primary" title="Save changes">💾 Save</button>
       </div>
     </div>
-    <pre id="note-content" class="note-content"></pre>
+    <textarea id="note-content" class="note-editor" placeholder="Loading..." maxlength="50000"></textarea>
     <p id="note-date" class="note-date"></p>
   </div>
 </main>
 
 <div id="toast" class="toast hidden"></div>
 
+<script src="/js/theme.js"></script>
+<script src="/js/speech.js"></script>
 <script src="/js/favorites.js"></script>
 <script src="/js/note.js"></script>
 </body>

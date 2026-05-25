@@ -1,7 +1,7 @@
 (function() {
   const unlockPrompt = document.getElementById('unlock-prompt');
   const noteContainer = document.getElementById('note-container');
-  const noteTitle = document.getElementById('note-title');
+  const noteTitleInput = document.getElementById('note-title-input');
   const noteContent = document.getElementById('note-content');
   const noteDate = document.getElementById('note-date');
   const unlockPassword = document.getElementById('unlock-password');
@@ -11,11 +11,13 @@
   const duplicateBtn = document.getElementById('duplicate-btn');
   const downloadBtn = document.getElementById('download-btn');
   const copyLinkBtn = document.getElementById('copy-link-btn');
+  const saveBtn = document.getElementById('save-btn');
   const toast = document.getElementById('toast');
 
   const shortId = window.location.pathname.split('/note/')[1] || '';
 
   let noteData = null;
+  let hasChanges = false;
 
   async function loadNote() {
     try {
@@ -41,16 +43,13 @@
     unlockPrompt.classList.add('hidden');
     noteContainer.classList.remove('hidden');
 
-    if (noteData.title) {
-      noteTitle.textContent = noteData.title;
-    } else {
-      noteTitle.textContent = 'Untitled Note';
-    }
-
-    noteContent.textContent = noteData.content;
+    noteTitleInput.value = noteData.title || '';
+    noteContent.value = noteData.content;
     noteDate.textContent = 'Created: ' + new Date(noteData.created_at).toLocaleString();
 
     updateFavStar();
+    hasChanges = false;
+    saveBtn.disabled = true;
   }
 
   function updateFavStar() {
@@ -59,6 +58,54 @@
     favBtn.title = isFav ? 'Remove from favorites' : 'Add to favorites';
     favBtn.classList.toggle('active', isFav);
   }
+
+  noteTitleInput.addEventListener('input', function() {
+    hasChanges = true;
+    saveBtn.disabled = false;
+  });
+
+  noteContent.addEventListener('input', function() {
+    hasChanges = true;
+    saveBtn.disabled = false;
+  });
+
+  saveBtn.addEventListener('click', async function() {
+    const title = noteTitleInput.value.trim();
+    const content = noteContent.value;
+
+    if (!content.trim()) {
+      showToast('Content cannot be empty');
+      return;
+    }
+
+    saveBtn.disabled = true;
+    saveBtn.textContent = '💾 Saving...';
+
+    try {
+      const res = await fetch(`/api/note/${shortId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title, content }),
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        hasChanges = false;
+        noteData.title = title;
+        noteData.content = content;
+        showToast('Note saved!');
+      } else {
+        showToast(data.error || 'Failed to save');
+        saveBtn.disabled = false;
+      }
+    } catch {
+      showToast('Network error');
+      saveBtn.disabled = false;
+    } finally {
+      saveBtn.textContent = '💾 Save';
+    }
+  });
 
   unlockBtn.addEventListener('click', async function() {
     const password = unlockPassword.value;
@@ -98,6 +145,13 @@
     if (e.key === 'Enter') unlockBtn.click();
   });
 
+  window.addEventListener('beforeunload', function(e) {
+    if (hasChanges) {
+      e.preventDefault();
+      e.returnValue = '';
+    }
+  });
+
   favBtn.addEventListener('click', function() {
     const title = noteData.title || '';
     window.Favorites.toggle(shortId, title);
@@ -106,13 +160,13 @@
   });
 
   duplicateBtn.addEventListener('click', async function() {
-    if (!noteData.content) return;
+    const content = noteContent.value;
 
     try {
       const res = await fetch('/api/note', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title: noteData.title + ' (copy)', content: noteData.content }),
+        body: JSON.stringify({ title: noteTitleInput.value + ' (copy)', content }),
       });
 
       const data = await res.json();

@@ -1,6 +1,6 @@
 const express = require('express');
 const rateLimit = require('express-rate-limit');
-const { createNote, getNote, verifyPassword, searchNotes } = require('./noteUtils');
+const { createNote, getNote, verifyPassword, updateNote, searchNotes } = require('./noteUtils');
 
 const router = express.Router();
 
@@ -8,6 +8,14 @@ const createLimiter = rateLimit({
   windowMs: 60 * 1000,
   max: 5,
   message: { error: 'Too many note creations. Please wait.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+const updateLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 5,
+  message: { error: 'Too many updates. Please wait.' },
   standardHeaders: true,
   legacyHeaders: false,
 });
@@ -109,6 +117,44 @@ router.get('/note/:id/meta', (req, res) => {
     created_at: note.created_at,
     is_protected: !!note.is_protected,
   });
+});
+
+router.put('/note/:id', (req, res, next) => { updateLimiter(req, res, next); }, (req, res) => {
+  try {
+    const note = getNote(req.params.id);
+    if (!note) {
+      return res.status(404).json({ error: 'Note not found' });
+    }
+
+    if (note.is_protected) {
+      const verified = req.session.verified && req.session.verified[note.short_id];
+      if (!verified) {
+        return res.status(401).json({ error: 'Password required. Verify first.' });
+      }
+    }
+
+    const { title, content } = req.body;
+
+    if (!content || content.trim().length === 0) {
+      return res.status(400).json({ error: 'Content cannot be empty' });
+    }
+    if (title && title.length > 200) {
+      return res.status(400).json({ error: 'Title too long (max 200 chars)' });
+    }
+    if (content.length > 50000) {
+      return res.status(400).json({ error: 'Content too long (max 50KB)' });
+    }
+
+    const updated = updateNote(req.params.id, title || '', content);
+    if (updated) {
+      res.json({ success: true });
+    } else {
+      res.status(500).json({ error: 'Failed to update note' });
+    }
+  } catch (err) {
+    console.error('Update error:', err);
+    res.status(500).json({ error: 'Failed to update note' });
+  }
 });
 
 router.get('/note/:id/download', (req, res) => {
