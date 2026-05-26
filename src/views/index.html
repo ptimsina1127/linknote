@@ -24,10 +24,13 @@
         <input type="checkbox" id="password-enable">
         <span>Password</span>
       </label>
-      <input type="password" id="password-input" class="password-input" placeholder="Password (min 4 chars)" disabled>
-      <button id="download-btn" class="toolbar-btn" title="Download">⬇</button>
+      <input type="password" id="password-input" class="password-input" placeholder="Min 4 chars" disabled>
       <button id="mic-btn" class="toolbar-btn" title="Speech-to-text (Chrome/Edge only)" style="display:none">🎤</button>
-      <button id="share-btn" class="btn btn-primary">Share</button>
+      <button id="fav-btn" class="toolbar-btn" title="Favorite">☆</button>
+      <button id="duplicate-btn" class="toolbar-btn" title="Duplicate">📋</button>
+      <button id="download-btn" class="toolbar-btn" title="Download">⬇</button>
+      <button id="copy-link-btn" class="toolbar-btn" title="Copy link">🔗</button>
+      <button id="primary-btn" class="btn btn-primary">Share</button>
     </div>
   </div>
   <textarea id="note-content" class="note-editor" placeholder="Write your note here..." maxlength="50000"></textarea>
@@ -37,6 +40,7 @@
 
 <script src="/js/theme.js"></script>
 <script src="/js/speech.js"></script>
+<script src="/js/favorites.js"></script>
 <script src="/js/app.js"></script>
 </body>
 </html>

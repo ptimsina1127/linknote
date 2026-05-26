@@ -26,14 +26,20 @@
   </div>
   <div id="note-container" class="hidden">
     <div class="toolbar">
-      <input type="text" id="note-title-input" class="title-input" placeholder="Title (optional)" maxlength="200">
+      <input type="text" id="title-input" class="title-input" placeholder="Title (optional)" maxlength="200">
       <div class="toolbar-right">
+        <label class="password-toggle" id="password-section" style="display:none">
+          <span class="lock-icon">🔒</span>
+          <input type="checkbox" id="password-enable">
+          <span>Password</span>
+        </label>
+        <input type="password" id="password-input" class="password-input" placeholder="Min 4 chars" disabled style="display:none">
         <button id="mic-btn" class="toolbar-btn" title="Speech-to-text (Chrome/Edge only)" style="display:none">🎤</button>
         <button id="fav-btn" class="toolbar-btn" title="Favorite">☆</button>
         <button id="duplicate-btn" class="toolbar-btn" title="Duplicate">📋</button>
         <button id="download-btn" class="toolbar-btn" title="Download">⬇</button>
         <button id="copy-link-btn" class="toolbar-btn" title="Copy link">🔗</button>
-        <button id="save-btn" class="btn btn-primary" title="Save changes">💾 Save</button>
+        <button id="primary-btn" class="btn btn-primary">💾 Save</button>
       </div>
     </div>
     <textarea id="note-content" class="note-editor" placeholder="Loading..." maxlength="50000"></textarea>

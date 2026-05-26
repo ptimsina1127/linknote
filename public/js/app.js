@@ -3,8 +3,11 @@
   const titleInput = document.getElementById('title-input');
   const passwordEnable = document.getElementById('password-enable');
   const passwordInput = document.getElementById('password-input');
-  const shareBtn = document.getElementById('share-btn');
+  const primaryBtn = document.getElementById('primary-btn');
   const downloadBtn = document.getElementById('download-btn');
+  const favBtn = document.getElementById('fav-btn');
+  const duplicateBtn = document.getElementById('duplicate-btn');
+  const copyLinkBtn = document.getElementById('copy-link-btn');
   const toast = document.getElementById('toast');
 
   let isSubmitting = false;
@@ -18,7 +21,7 @@
     this.style.height = 'auto';
   });
 
-  shareBtn.addEventListener('click', createNote);
+  primaryBtn.addEventListener('click', createNote);
 
   content.addEventListener('keydown', function(e) {
     if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
@@ -33,16 +36,29 @@
       showToast('Nothing to download');
       return;
     }
-    const title = titleInput.value.trim() || 'note';
+    const t = titleInput.value.trim() || 'note';
     const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `${title.replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 50) || 'note'}.txt`;
+    a.download = `${t.replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 50) || 'note'}.txt`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
+  });
+
+  favBtn.addEventListener('click', function() {
+    showToast('Create the note first to favorite it');
+  });
+
+  duplicateBtn.addEventListener('click', function() {
+    showToast('Create the note first to duplicate it');
+  });
+
+  copyLinkBtn.addEventListener('click', function() {
+    navigator.clipboard.writeText(window.location.href).catch(() => {});
+    showToast('Link copied!');
   });
 
   async function createNote() {
@@ -65,8 +81,8 @@
     }
 
     isSubmitting = true;
-    shareBtn.disabled = true;
-    shareBtn.textContent = 'Creating...';
+    primaryBtn.disabled = true;
+    primaryBtn.textContent = 'Creating...';
 
     try {
       const res = await fetch('/api/note', {
@@ -80,8 +96,8 @@
       if (!res.ok) {
         showToast(data.error || 'Failed to create note');
         isSubmitting = false;
-        shareBtn.disabled = false;
-        shareBtn.textContent = 'Share';
+        primaryBtn.disabled = false;
+        primaryBtn.textContent = 'Share';
         return;
       }
 
@@ -89,8 +105,8 @@
     } catch (err) {
       showToast('Network error. Please try again.');
       isSubmitting = false;
-      shareBtn.disabled = false;
-      shareBtn.textContent = 'Share';
+      primaryBtn.disabled = false;
+      primaryBtn.textContent = 'Share';
     }
   }
 

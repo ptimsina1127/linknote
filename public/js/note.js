@@ -1,7 +1,7 @@
 (function() {
   const unlockPrompt = document.getElementById('unlock-prompt');
   const noteContainer = document.getElementById('note-container');
-  const noteTitleInput = document.getElementById('note-title-input');
+  const titleInput = document.getElementById('title-input');
   const noteContent = document.getElementById('note-content');
   const noteDate = document.getElementById('note-date');
   const unlockPassword = document.getElementById('unlock-password');
@@ -11,13 +11,18 @@
   const duplicateBtn = document.getElementById('duplicate-btn');
   const downloadBtn = document.getElementById('download-btn');
   const copyLinkBtn = document.getElementById('copy-link-btn');
-  const saveBtn = document.getElementById('save-btn');
+  const primaryBtn = document.getElementById('primary-btn');
+  const passwordSection = document.getElementById('password-section');
+  const passwordInput = document.getElementById('password-input');
   const toast = document.getElementById('toast');
 
   const shortId = window.location.pathname.split('/note/')[1] || '';
 
   let noteData = null;
   let hasChanges = false;
+
+  passwordSection.style.display = 'none';
+  passwordInput.style.display = 'none';
 
   async function loadNote() {
     try {
@@ -43,13 +48,13 @@
     unlockPrompt.classList.add('hidden');
     noteContainer.classList.remove('hidden');
 
-    noteTitleInput.value = noteData.title || '';
+    titleInput.value = noteData.title || '';
     noteContent.value = noteData.content;
     noteDate.textContent = 'Created: ' + new Date(noteData.created_at).toLocaleString();
 
     updateFavStar();
     hasChanges = false;
-    saveBtn.disabled = true;
+    primaryBtn.disabled = true;
   }
 
   function updateFavStar() {
@@ -59,18 +64,27 @@
     favBtn.classList.toggle('active', isFav);
   }
 
-  noteTitleInput.addEventListener('input', function() {
+  titleInput.addEventListener('input', function() {
     hasChanges = true;
-    saveBtn.disabled = false;
+    primaryBtn.disabled = false;
   });
 
   noteContent.addEventListener('input', function() {
     hasChanges = true;
-    saveBtn.disabled = false;
+    primaryBtn.disabled = false;
   });
 
-  saveBtn.addEventListener('click', async function() {
-    const title = noteTitleInput.value.trim();
+  primaryBtn.addEventListener('click', saveNote);
+
+  noteContent.addEventListener('keydown', function(e) {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+      e.preventDefault();
+      saveNote();
+    }
+  });
+
+  async function saveNote() {
+    const title = titleInput.value.trim();
     const content = noteContent.value;
 
     if (!content.trim()) {
@@ -78,8 +92,8 @@
       return;
     }
 
-    saveBtn.disabled = true;
-    saveBtn.textContent = '💾 Saving...';
+    primaryBtn.disabled = true;
+    primaryBtn.textContent = '💾 Saving...';
 
     try {
       const res = await fetch(`/api/note/${shortId}`, {
@@ -95,17 +109,18 @@
         noteData.title = title;
         noteData.content = content;
         showToast('Note saved!');
+        primaryBtn.disabled = true;
       } else {
         showToast(data.error || 'Failed to save');
-        saveBtn.disabled = false;
+        primaryBtn.disabled = false;
       }
     } catch {
       showToast('Network error');
-      saveBtn.disabled = false;
+      primaryBtn.disabled = false;
     } finally {
-      saveBtn.textContent = '💾 Save';
+      primaryBtn.textContent = '💾 Save';
     }
-  });
+  }
 
   unlockBtn.addEventListener('click', async function() {
     const password = unlockPassword.value;
@@ -166,14 +181,13 @@
       const res = await fetch('/api/note', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title: noteTitleInput.value + ' (copy)', content }),
+        body: JSON.stringify({ title: titleInput.value + ' (copy)', content }),
       });
 
       const data = await res.json();
 
       if (res.ok) {
         window.location.href = `/note/${data.short_id}`;
-        showToast('Note duplicated! You can now edit this copy.');
       } else {
         showToast(data.error || 'Failed to duplicate');
       }
