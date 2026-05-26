@@ -26,6 +26,14 @@ app.use(express.static(path.join(__dirname, '..', 'public')));
 app.use('/api', apiRouter);
 app.use('/', sitemapRouter);
 
+app.get('/robots.txt', (req, res) => {
+  res.setHeader('Content-Type', 'text/plain');
+  res.send(`User-agent: *
+Allow: /
+Sitemap: ${config.baseUrl}/sitemap.xml
+`);
+});
+
 function loadHtml(file) {
   const html = fs.readFileSync(path.join(__dirname, '..', 'src', 'views', file), 'utf-8');
   return html.replace(/__BASE__/g, config.baseUrl);
@@ -55,7 +63,7 @@ app.get('/note/:id', (req, res) => {
 
   const title = note.title
     ? `${note.title} - LinkedPad`
-    : 'LinkedPad - A Fast Shareable Notepad';
+    : 'LinkedPad - An Anonymous and Shareable Online Notepad';
 
   let desc;
   if (note.is_protected) {
@@ -65,11 +73,21 @@ app.get('/note/:id', (req, res) => {
     desc = raw.length > 200 ? raw.substring(0, 200) + '...' : raw;
   }
 
+  const jsonLd = JSON.stringify({
+    '@context': 'https://schema.org',
+    '@type': 'WebPage',
+    name: title,
+    description: desc,
+    url: ogUrl,
+    image: ogImage,
+  });
+
   let html = NOTE_TEMPLATE
     .replace(/__OG_TITLE__/g, title)
     .replace(/__OG_DESC__/g, desc.replace(/"/g, '&quot;'))
     .replace(/__OG_IMAGE__/g, ogImage)
-    .replace(/__OG_URL__/g, ogUrl);
+    .replace(/__OG_URL__/g, ogUrl)
+    .replace('__JSON_LD__', jsonLd);
 
   res.send(html);
 });
