@@ -29,17 +29,14 @@
   <div class="toolbar">
     <input type="text" id="title-input" class="title-input" placeholder="Title (optional)" maxlength="200" title="Give your note a title">
     <div class="toolbar-right">
-      <label class="password-toggle" title="Enable password protection for this note">
-        <span class="lock-icon">🔒</span>
-        <input type="checkbox" id="password-enable">
-        <span>Password</span>
-      </label>
-      <input type="password" id="password-input" class="password-input" placeholder="Min 4 chars" disabled title="Enter a password (minimum 4 characters)">
+      <span class="pw-wrapper">
+        <button id="password-btn" class="toolbar-btn" title="Protect this note with a password">🔒</button>
+        <input type="password" id="password-input" class="pw-inline-input" placeholder="Password (min 4 chars)" maxlength="100">
+      </span>
       <button id="mic-btn" class="toolbar-btn" title="Use speech-to-text to enter content (Chrome/Edge only)" style="display:none">🎤</button>
       <button id="fav-btn" class="toolbar-btn" title="Add this note to your favorites">☆</button>
       <button id="duplicate-btn" class="toolbar-btn" title="Create a copy of this note">📋</button>
       <button id="download-btn" class="toolbar-btn" title="Download this note as a text file">⬇</button>
-      <button id="copy-link-btn" class="toolbar-btn" title="Copy the page URL to clipboard">🔗</button>
       <button id="primary-btn" class="btn btn-primary" title="Create a shareable link for this note">Share</button>
     </div>
   </div>

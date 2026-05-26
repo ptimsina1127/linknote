@@ -133,7 +133,7 @@ router.put('/note/:id', (req, res, next) => { updateLimiter(req, res, next); }, 
       }
     }
 
-    const { title, content } = req.body;
+    const { title, content, password } = req.body;
 
     if (!content || content.trim().length === 0) {
       return res.status(400).json({ error: 'Content cannot be empty' });
@@ -144,8 +144,11 @@ router.put('/note/:id', (req, res, next) => { updateLimiter(req, res, next); }, 
     if (content.length > 50000) {
       return res.status(400).json({ error: 'Content too long (max 50KB)' });
     }
+    if (password !== undefined && password !== null && password.length < 4) {
+      return res.status(400).json({ error: 'Password must be at least 4 characters' });
+    }
 
-    const updated = updateNote(req.params.id, title || '', content);
+    const updated = updateNote(req.params.id, title || '', content, password);
     if (updated) {
       res.json({ success: true });
     } else {

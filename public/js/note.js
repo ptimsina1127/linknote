@@ -7,22 +7,93 @@
   const unlockPassword = document.getElementById('unlock-password');
   const unlockBtn = document.getElementById('unlock-btn');
   const unlockError = document.getElementById('unlock-error');
+  const passwordBtn = document.getElementById('password-btn');
+  const passwordInput = document.getElementById('password-input');
   const favBtn = document.getElementById('fav-btn');
   const duplicateBtn = document.getElementById('duplicate-btn');
   const downloadBtn = document.getElementById('download-btn');
-  const copyLinkBtn = document.getElementById('copy-link-btn');
-  const primaryBtn = document.getElementById('primary-btn');
-  const passwordSection = document.getElementById('password-section');
-  const passwordInput = document.getElementById('password-input');
+  const shareBtn = document.getElementById('share-btn');
   const toast = document.getElementById('toast');
+  const shareModal = document.getElementById('share-modal');
+  const shareLink = document.getElementById('share-link');
+  const copyShareLink = document.getElementById('copy-share-link');
+  const closeShareModal = document.getElementById('close-share-modal');
 
   const shortId = window.location.pathname.split('/note/')[1] || '';
 
   let noteData = null;
-  let hasChanges = false;
+  let saveTimeout = null;
+  let isSaving = false;
 
-  passwordSection.style.display = 'none';
   passwordInput.style.display = 'none';
+
+  passwordBtn.addEventListener('click', function() {
+    if (!noteData) return;
+    passwordInput.style.display = '';
+    passwordInput.classList.toggle('visible');
+    if (passwordInput.classList.contains('visible')) {
+      passwordInput.focus();
+    } else {
+      passwordInput.style.display = 'none';
+    }
+  });
+
+  passwordInput.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') {
+      passwordInput.classList.remove('visible');
+      passwordInput.style.display = 'none';
+      setPassword();
+    }
+  });
+
+  passwordInput.addEventListener('blur', function() {
+    passwordInput.classList.remove('visible');
+    passwordInput.style.display = 'none';
+    if (passwordInput.value) setPassword();
+  });
+
+  async function setPassword() {
+    const pw = passwordInput.value;
+    if (pw && pw.length < 4) {
+      showToast('Password must be at least 4 characters');
+      passwordInput.value = '';
+      return;
+    }
+    try {
+      const res = await fetch(`/api/note/${shortId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: titleInput.value.trim() || '',
+          content: noteContent.value,
+          password: pw || null,
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        noteData.is_protected = !!pw;
+        passwordBtn.textContent = pw ? '🔓' : '🔒';
+        passwordBtn.title = pw ? 'Password set. Click to change' : 'Protect this note with a password';
+        showToast(pw ? 'Password set' : 'Password removed');
+      } else {
+        showToast(data.error || 'Failed to set password');
+      }
+    } catch {
+      showToast('Network error');
+    }
+    passwordInput.value = '';
+    updatePasswordIcon();
+  }
+
+  function updatePasswordIcon() {
+    if (noteData && noteData.is_protected) {
+      passwordBtn.textContent = '🔓';
+      passwordBtn.title = 'Password is set. Click to change';
+    } else {
+      passwordBtn.textContent = '🔒';
+      passwordBtn.title = 'Protect this note with a password';
+    }
+  }
 
   async function loadNote() {
     try {
@@ -53,8 +124,7 @@
     noteDate.textContent = 'Created: ' + new Date(noteData.created_at).toLocaleString();
 
     updateFavStar();
-    hasChanges = false;
-    primaryBtn.disabled = true;
+    updatePasswordIcon();
   }
 
   function updateFavStar() {
@@ -64,36 +134,22 @@
     favBtn.classList.toggle('active', isFav);
   }
 
-  titleInput.addEventListener('input', function() {
-    hasChanges = true;
-    primaryBtn.disabled = false;
-  });
+  function debounceSave() {
+    clearTimeout(saveTimeout);
+    saveTimeout = setTimeout(autosave, 2000);
+  }
 
-  noteContent.addEventListener('input', function() {
-    hasChanges = true;
-    primaryBtn.disabled = false;
-  });
+  titleInput.addEventListener('input', debounceSave);
+  noteContent.addEventListener('input', debounceSave);
 
-  primaryBtn.addEventListener('click', saveNote);
-
-  noteContent.addEventListener('keydown', function(e) {
-    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
-      e.preventDefault();
-      saveNote();
-    }
-  });
-
-  async function saveNote() {
+  async function autosave() {
+    if (isSaving || !noteData) return;
     const title = titleInput.value.trim();
     const content = noteContent.value;
 
-    if (!content.trim()) {
-      showToast('Content cannot be empty');
-      return;
-    }
+    if (!content.trim()) return;
 
-    primaryBtn.disabled = true;
-    primaryBtn.textContent = '💾 Saving...';
+    isSaving = true;
 
     try {
       const res = await fetch(`/api/note/${shortId}`, {
@@ -105,20 +161,13 @@
       const data = await res.json();
 
       if (data.success) {
-        hasChanges = false;
         noteData.title = title;
         noteData.content = content;
-        showToast('Note saved!');
-        primaryBtn.disabled = true;
-      } else {
-        showToast(data.error || 'Failed to save');
-        primaryBtn.disabled = false;
       }
     } catch {
-      showToast('Network error');
-      primaryBtn.disabled = false;
+      // silently fail - will retry on next input
     } finally {
-      primaryBtn.textContent = '💾 Save';
+      isSaving = false;
     }
   }
 
@@ -160,13 +209,6 @@
     if (e.key === 'Enter') unlockBtn.click();
   });
 
-  window.addEventListener('beforeunload', function(e) {
-    if (hasChanges) {
-      e.preventDefault();
-      e.returnValue = '';
-    }
-  });
-
   favBtn.addEventListener('click', function() {
     const title = noteData.title || '';
     window.Favorites.toggle(shortId, title);
@@ -200,10 +242,33 @@
     window.location.href = `/api/note/${shortId}/download`;
   });
 
-  copyLinkBtn.addEventListener('click', function() {
+  shareBtn.addEventListener('click', function() {
     const url = window.location.href;
-    navigator.clipboard.writeText(url).catch(() => {});
+    const title = encodeURIComponent(noteData.title || 'LinkedPad Note');
+    const encodedUrl = encodeURIComponent(url);
+
+    shareLink.value = url;
+    document.getElementById('share-twitter').href = `https://twitter.com/intent/tweet?text=${title}&url=${encodedUrl}`;
+    document.getElementById('share-facebook').href = `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`;
+    document.getElementById('share-whatsapp').href = `https://wa.me/?text=${title}%20${encodedUrl}`;
+    document.getElementById('share-linkedin').href = `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`;
+    document.getElementById('share-reddit').href = `https://reddit.com/submit?url=${encodedUrl}&title=${title}`;
+
+    shareModal.classList.remove('hidden');
+  });
+
+  copyShareLink.addEventListener('click', function() {
+    shareLink.select();
+    navigator.clipboard.writeText(shareLink.value).catch(() => {});
     showToast('Link copied!');
+  });
+
+  closeShareModal.addEventListener('click', function() {
+    shareModal.classList.add('hidden');
+  });
+
+  shareModal.addEventListener('click', function(e) {
+    if (e.target === shareModal) shareModal.classList.add('hidden');
   });
 
   function showToast(msg) {

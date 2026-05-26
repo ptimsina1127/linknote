@@ -74,11 +74,24 @@ function getNoteCount() {
   return db.prepare('SELECT COUNT(*) as total FROM notes WHERE is_protected = 0').get().total;
 }
 
-function updateNote(shortId, title, content) {
-  const stmt = db.prepare(
-    "UPDATE notes SET title = ?, content = ?, updated_at = datetime('now') WHERE short_id = ?"
-  );
-  const result = stmt.run(title, content, shortId);
+function updateNote(shortId, title, content, password) {
+  let sql, params;
+
+  if (password !== undefined) {
+    let passwordHash = null;
+    let isProtected = 0;
+    if (password && password.length >= 4) {
+      passwordHash = bcrypt.hashSync(password, 10);
+      isProtected = 1;
+    }
+    sql = "UPDATE notes SET title = ?, content = ?, password_hash = ?, is_protected = ?, updated_at = datetime('now') WHERE short_id = ?";
+    params = [title, content, passwordHash, isProtected, shortId];
+  } else {
+    sql = "UPDATE notes SET title = ?, content = ?, updated_at = datetime('now') WHERE short_id = ?";
+    params = [title, content, shortId];
+  }
+
+  const result = db.prepare(sql).run(...params);
   return result.changes > 0;
 }
 
