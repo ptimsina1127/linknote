@@ -4,12 +4,8 @@
   const passwordEnable = document.getElementById('password-enable');
   const passwordInput = document.getElementById('password-input');
   const shareBtn = document.getElementById('share-btn');
+  const downloadBtn = document.getElementById('download-btn');
   const toast = document.getElementById('toast');
-  const modal = document.getElementById('result-modal');
-  const resultUrl = document.getElementById('result-url');
-  const copyBtn = document.getElementById('copy-btn');
-  const viewNoteBtn = document.getElementById('view-note-btn');
-  const createAnother = document.getElementById('create-another');
 
   let isSubmitting = false;
 
@@ -29,6 +25,24 @@
       e.preventDefault();
       createNote();
     }
+  });
+
+  downloadBtn.addEventListener('click', function() {
+    const text = content.value;
+    if (!text.trim()) {
+      showToast('Nothing to download');
+      return;
+    }
+    const title = titleInput.value.trim() || 'note';
+    const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${title.replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 50) || 'note'}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
   });
 
   async function createNote() {
@@ -65,43 +79,20 @@
 
       if (!res.ok) {
         showToast(data.error || 'Failed to create note');
+        isSubmitting = false;
+        shareBtn.disabled = false;
+        shareBtn.textContent = 'Share';
         return;
       }
 
-      const url = `${window.location.origin}/note/${data.short_id}`;
-      resultUrl.value = url;
-      viewNoteBtn.href = url;
-      modal.classList.remove('hidden');
+      window.location.href = `/note/${data.short_id}`;
     } catch (err) {
       showToast('Network error. Please try again.');
-    } finally {
       isSubmitting = false;
       shareBtn.disabled = false;
       shareBtn.textContent = 'Share';
     }
   }
-
-  copyBtn.addEventListener('click', function() {
-    resultUrl.select();
-    navigator.clipboard.writeText(resultUrl.value).catch(() => {});
-    showToast('Link copied!');
-  });
-
-  createAnother.addEventListener('click', function() {
-    modal.classList.add('hidden');
-    content.value = '';
-    titleInput.value = '';
-    passwordEnable.checked = false;
-    passwordInput.disabled = true;
-    passwordInput.value = '';
-    content.focus();
-  });
-
-  modal.addEventListener('click', function(e) {
-    if (e.target === modal) {
-      modal.classList.add('hidden');
-    }
-  });
 
   function showToast(msg) {
     toast.textContent = msg;

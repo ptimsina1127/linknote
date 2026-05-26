@@ -25,6 +25,7 @@
         <span>Password</span>
       </label>
       <input type="password" id="password-input" class="password-input" placeholder="Password (min 4 chars)" disabled>
+      <button id="download-btn" class="toolbar-btn" title="Download">⬇</button>
       <button id="mic-btn" class="toolbar-btn" title="Speech-to-text (Chrome/Edge only)" style="display:none">🎤</button>
       <button id="share-btn" class="btn btn-primary">Share</button>
     </div>
@@ -33,18 +34,6 @@
 </main>
 
 <div id="toast" class="toast hidden"></div>
-<div id="result-modal" class="modal hidden">
-  <div class="modal-content">
-    <h2>Note created!</h2>
-    <p>Share this link:</p>
-    <div class="result-link">
-      <input type="text" id="result-url" readonly>
-      <button id="copy-btn" class="btn">Copy</button>
-    </div>
-    <a id="view-note-btn" class="btn btn-primary" target="_blank">View note</a>
-    <button id="create-another" class="btn">Create another</button>
-  </div>
-</div>
 
 <script src="/js/theme.js"></script>
 <script src="/js/speech.js"></script>
