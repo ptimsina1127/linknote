@@ -64,34 +64,11 @@ body {
 
 .nav-links a:hover, .nav-links a.active { color: var(--text); }
 
-/* Page header */
-.page-header {
-  text-align: center;
-  padding: 14px 20px 6px;
-  flex-shrink: 0;
-}
-
-.site-title {
-  font-family: 'Pacifico', cursive;
-  font-size: 2rem;
-  font-weight: 400;
-  color: var(--primary);
-  line-height: 1.2;
-  margin: 0;
-}
-
-.site-tagline {
-  font-size: 0.85rem;
-  color: var(--text-dim);
-  margin: 2px 0 0;
-}
-
-/* Editor page - fills remaining screen */
+/* Editor page - fills 95% of screen */
 .editor-page {
   display: flex;
   flex-direction: column;
-  flex: 1;
-  min-height: 0;
+  height: 95vh;
   padding: 0;
 }
 
