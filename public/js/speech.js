@@ -1,9 +1,7 @@
 (function() {
   const SpeechRecognition = window.webkitSpeechRecognition || window.SpeechRecognition;
 
-  if (!SpeechRecognition) {
-    return;
-  }
+  if (!SpeechRecognition) return;
 
   const micBtn = document.getElementById('mic-btn');
   if (!micBtn) return;
@@ -12,6 +10,10 @@
 
   let isListening = false;
   let recognition = null;
+  let silenceTimer = null;
+  let lastResultIndex = -1;
+
+  const SILENCE_TIMEOUT = 3000;
 
   const commandMap = {
     'enter': '\n',
@@ -30,12 +32,10 @@
 
   function processTranscript(transcript) {
     let text = transcript.trim();
-
     for (const [phrase, replacement] of Object.entries(commandMap)) {
       const regex = new RegExp(`\\b${phrase}\\b`, 'gi');
       text = text.replace(regex, replacement);
     }
-
     return text;
   }
 
@@ -54,37 +54,69 @@
     textarea.focus();
   }
 
+  function resetSilenceTimer() {
+    if (silenceTimer) clearTimeout(silenceTimer);
+    silenceTimer = setTimeout(function() {
+      stopListening();
+    }, SILENCE_TIMEOUT);
+  }
+
   function startListening() {
     recognition = new SpeechRecognition();
     recognition.lang = 'en-US';
-    recognition.interimResults = false;
-    recognition.continuous = false;
+    recognition.interimResults = true;
+    recognition.continuous = true;
     recognition.maxAlternatives = 1;
 
+    lastResultIndex = -1;
+
     recognition.onresult = function(event) {
-      const transcript = event.results[0][0].transcript;
-      const processed = processTranscript(transcript);
-      insertText(processed);
-      stopListening();
+      resetSilenceTimer();
+
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        if (!event.results[i].isFinal) continue;
+        if (i <= lastResultIndex) continue;
+
+        lastResultIndex = i;
+        const transcript = event.results[i][0].transcript;
+        const processed = processTranscript(transcript);
+        if (processed) {
+          insertText(processed);
+        }
+      }
     };
 
     recognition.onerror = function(event) {
+      if (event.error === 'no-speech') {
+        resetSilenceTimer();
+        return;
+      }
       console.warn('Speech error:', event.error);
       stopListening();
     };
 
     recognition.onend = function() {
-      stopListening();
+      if (isListening) {
+        stopListening();
+      }
     };
 
-    recognition.start();
-    isListening = true;
-    micBtn.classList.add('mic-recording');
-    micBtn.textContent = '🔴';
-    micBtn.title = 'Listening... tap to stop';
+    try {
+      recognition.start();
+      isListening = true;
+      micBtn.classList.add('mic-recording');
+      micBtn.textContent = '🔴';
+      micBtn.title = 'Listening... speak now';
+    } catch(e) {
+      stopListening();
+    }
   }
 
   function stopListening() {
+    if (silenceTimer) {
+      clearTimeout(silenceTimer);
+      silenceTimer = null;
+    }
     if (recognition) {
       try { recognition.stop(); } catch(e) {}
       recognition = null;
