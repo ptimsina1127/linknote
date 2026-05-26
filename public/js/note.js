@@ -18,12 +18,14 @@
   const shareLink = document.getElementById('share-link');
   const copyShareLink = document.getElementById('copy-share-link');
   const closeShareModal = document.getElementById('close-share-modal');
+  const autosaveIndicator = document.getElementById('autosave-indicator');
 
   const shortId = window.location.pathname.split('/note/')[1] || '';
 
   let noteData = null;
   let saveTimeout = null;
   let isSaving = false;
+  let indicatorTimeout = null;
 
   passwordInput.style.display = 'none';
 
@@ -72,8 +74,6 @@
       const data = await res.json();
       if (data.success) {
         noteData.is_protected = !!pw;
-        passwordBtn.textContent = pw ? '🔓' : '🔒';
-        passwordBtn.title = pw ? 'Password set. Click to change' : 'Protect this note with a password';
         showToast(pw ? 'Password set' : 'Password removed');
       } else {
         showToast(data.error || 'Failed to set password');
@@ -136,6 +136,7 @@
 
   function debounceSave() {
     clearTimeout(saveTimeout);
+    showIndicator('Saving...');
     saveTimeout = setTimeout(autosave, 2000);
   }
 
@@ -163,11 +164,25 @@
       if (data.success) {
         noteData.title = title;
         noteData.content = content;
+        showIndicator('Saved');
+      } else {
+        showIndicator('Save failed');
       }
     } catch {
-      // silently fail - will retry on next input
+      showIndicator('Save failed');
     } finally {
       isSaving = false;
+    }
+  }
+
+  function showIndicator(msg) {
+    autosaveIndicator.textContent = msg;
+    autosaveIndicator.classList.add('show');
+    clearTimeout(indicatorTimeout);
+    if (msg !== 'Saving...') {
+      indicatorTimeout = setTimeout(function() {
+        autosaveIndicator.classList.remove('show');
+      }, 2000);
     }
   }
 

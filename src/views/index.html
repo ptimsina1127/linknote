@@ -43,7 +43,28 @@
   <textarea id="note-content" class="note-editor" placeholder="Write your note here..." maxlength="50000" title="Type or paste your note content here"></textarea>
 </main>
 
-<div id="toast" class="toast hidden"></div>
+  <div id="autosave-indicator"></div>
+
+  <div id="share-modal" class="modal hidden">
+    <div class="modal-content">
+      <h2>Share this note</h2>
+      <p>Anyone with this link can view your note</p>
+      <div class="result-link">
+        <input type="text" id="share-link" readonly>
+        <button id="copy-share-link" class="btn btn-primary" title="Copy to clipboard">Copy</button>
+      </div>
+      <div class="share-buttons">
+        <a id="share-twitter" href="#" target="_blank" rel="noopener" class="btn" title="Share on X (Twitter)">𝕏</a>
+        <a id="share-facebook" href="#" target="_blank" rel="noopener" class="btn" title="Share on Facebook">fb</a>
+        <a id="share-whatsapp" href="#" target="_blank" rel="noopener" class="btn" title="Share on WhatsApp">WA</a>
+        <a id="share-linkedin" href="#" target="_blank" rel="noopener" class="btn" title="Share on LinkedIn">in</a>
+        <a id="share-reddit" href="#" target="_blank" rel="noopener" class="btn" title="Share on Reddit">Reddit</a>
+      </div>
+      <button id="close-share-modal" class="btn" title="Close">Close</button>
+    </div>
+  </div>
+
+  <div id="toast" class="toast hidden"></div>
 
 <script src="/js/theme.js"></script>
 <script src="/js/speech.js"></script>

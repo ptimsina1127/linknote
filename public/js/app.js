@@ -8,8 +8,13 @@
   const favBtn = document.getElementById('fav-btn');
   const duplicateBtn = document.getElementById('duplicate-btn');
   const toast = document.getElementById('toast');
+  const shareModal = document.getElementById('share-modal');
+  const shareLink = document.getElementById('share-link');
+  const copyShareLink = document.getElementById('copy-share-link');
+  const closeShareModal = document.getElementById('close-share-modal');
 
   let isSubmitting = false;
+  let createdShortId = null;
 
   passwordBtn.addEventListener('click', function() {
     passwordInput.classList.toggle('visible');
@@ -120,7 +125,20 @@
         return;
       }
 
-      window.location.href = `/note/${data.short_id}`;
+      createdShortId = data.short_id;
+      const url = window.location.origin + '/note/' + data.short_id;
+      const encodedUrl = encodeURIComponent(url);
+      const encodedTitle = encodeURIComponent(title || 'LinkedPad Note');
+
+      shareLink.value = url;
+      document.getElementById('share-twitter').href = `https://twitter.com/intent/tweet?text=${encodedTitle}&url=${encodedUrl}`;
+      document.getElementById('share-facebook').href = `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`;
+      document.getElementById('share-whatsapp').href = `https://wa.me/?text=${encodedTitle}%20${encodedUrl}`;
+      document.getElementById('share-linkedin').href = `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`;
+      document.getElementById('share-reddit').href = `https://reddit.com/submit?url=${encodedUrl}&title=${encodedTitle}`;
+
+      primaryBtn.textContent = 'Shared';
+      shareModal.classList.remove('hidden');
     } catch (err) {
       showToast('Network error. Please try again.');
       isSubmitting = false;
@@ -128,6 +146,20 @@
       primaryBtn.textContent = 'Share';
     }
   }
+
+  copyShareLink.addEventListener('click', function() {
+    shareLink.select();
+    navigator.clipboard.writeText(shareLink.value).catch(() => {});
+    showToast('Link copied!');
+  });
+
+  closeShareModal.addEventListener('click', function() {
+    shareModal.classList.add('hidden');
+  });
+
+  shareModal.addEventListener('click', function(e) {
+    if (e.target === shareModal) shareModal.classList.add('hidden');
+  });
 
   function showToast(msg) {
     toast.textContent = msg;

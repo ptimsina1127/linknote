@@ -180,5 +180,7 @@
     } else {
       startListening();
     }
+    const textarea = getTextarea();
+    if (textarea) textarea.focus();
   });
 })();

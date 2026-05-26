@@ -123,9 +123,8 @@ body {
 
 .pw-inline-input {
   position: absolute;
-  left: calc(100% + 4px);
-  top: 50%;
-  transform: translateY(-50%);
+  top: calc(100% + 4px);
+  left: 0;
   width: 0;
   padding: 0;
   border: none;
@@ -465,8 +464,24 @@ body {
   }
 }
 
-/* Lock icon on protected notes */
-.protected-badge { font-size: 0.8rem; color: var(--text-dim); margin-left: 8px; }
+/* Autosave indicator */
+#autosave-indicator {
+  position: fixed;
+  top: 12px;
+  right: 12px;
+  font-size: 0.75rem;
+  color: var(--text-dim);
+  background: var(--surface);
+  padding: 4px 10px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  opacity: 0;
+  transition: opacity 0.3s;
+  z-index: 100;
+  pointer-events: none;
+}
+
+#autosave-indicator.show { opacity: 1; }
 
 /* Scrollbar */
 ::-webkit-scrollbar { width: 8px; }
