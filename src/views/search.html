@@ -15,18 +15,18 @@
 </head>
 <body>
 <nav class="navbar">
-  <a href="/" class="logo">LinkedPad</a>
+  <a href="/" class="logo" title="Go to homepage">LinkedPad</a>
   <div class="nav-links">
-    <a href="/search" class="active">Search</a>
-    <a href="/favorites">Favorites</a>
+    <a href="/search" class="active" title="Search through shared notes">Search</a>
+    <a href="/favorites" title="View your favorited notes">Favorites</a>
   </div>
-  <button id="theme-btn" class="toolbar-btn" title="Toggle theme">🌙</button>
+  <button id="theme-btn" class="toolbar-btn" title="Switch between light and dark theme">🌙</button>
 </nav>
 <main class="page-center">
   <h1>Search Notes</h1>
   <div class="search-bar">
-    <input type="text" id="search-input" placeholder="Search notes..." autofocus>
-    <button id="sort-btn" class="toolbar-btn" title="Toggle sort order">↓ Newest</button>
+    <input type="text" id="search-input" placeholder="Search notes..." autofocus title="Type words to search notes. Multiple words = all must match">
+    <button id="sort-btn" class="toolbar-btn" title="Toggle between newest first and oldest first">↓ Newest</button>
   </div>
   <div id="search-results" class="notes-list">
     <p class="hint">Start typing to search notes</p>

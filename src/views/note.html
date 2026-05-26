@@ -20,39 +20,39 @@
 <nav class="navbar">
   <a href="/" class="logo">LinkedPad</a>
   <div class="nav-links">
-    <a href="/search">Search</a>
-    <a href="/favorites">Favorites</a>
+    <a href="/search" title="Search through shared notes">Search</a>
+    <a href="/favorites" title="View your favorited notes">Favorites</a>
   </div>
-  <button id="theme-btn" class="toolbar-btn" title="Toggle theme">🌙</button>
+  <button id="theme-btn" class="toolbar-btn" title="Switch between light and dark theme">🌙</button>
 </nav>
 <main class="note-view-page">
   <div id="unlock-prompt" class="unlock-prompt hidden">
     <div class="unlock-box">
       <h2>This note is password protected</h2>
-      <input type="password" id="unlock-password" placeholder="Enter password">
-      <button id="unlock-btn" class="btn btn-primary">Unlock</button>
+      <input type="password" id="unlock-password" placeholder="Enter password" title="Enter the password to view this note">
+      <button id="unlock-btn" class="btn btn-primary" title="Verify password to unlock note content">Unlock</button>
       <p id="unlock-error" class="error hidden">Incorrect password</p>
     </div>
   </div>
   <div id="note-container" class="hidden">
     <div class="toolbar">
-      <input type="text" id="title-input" class="title-input" placeholder="Title (optional)" maxlength="200">
+      <input type="text" id="title-input" class="title-input" placeholder="Title (optional)" maxlength="200" title="Edit the note title">
       <div class="toolbar-right">
-        <label class="password-toggle" id="password-section" style="display:none">
+        <label class="password-toggle" id="password-section" style="display:none" title="Enable password protection">
           <span class="lock-icon">🔒</span>
           <input type="checkbox" id="password-enable">
           <span>Password</span>
         </label>
-        <input type="password" id="password-input" class="password-input" placeholder="Min 4 chars" disabled style="display:none">
-        <button id="mic-btn" class="toolbar-btn" title="Speech-to-text (Chrome/Edge only)" style="display:none">🎤</button>
-        <button id="fav-btn" class="toolbar-btn" title="Favorite">☆</button>
-        <button id="duplicate-btn" class="toolbar-btn" title="Duplicate">📋</button>
-        <button id="download-btn" class="toolbar-btn" title="Download">⬇</button>
-        <button id="copy-link-btn" class="toolbar-btn" title="Copy link">🔗</button>
-        <button id="primary-btn" class="btn btn-primary">💾 Save</button>
+        <input type="password" id="password-input" class="password-input" placeholder="Min 4 chars" disabled style="display:none" title="Enter a password (minimum 4 characters)">
+        <button id="mic-btn" class="toolbar-btn" title="Use speech-to-text to enter content (Chrome/Edge only)" style="display:none">🎤</button>
+        <button id="fav-btn" class="toolbar-btn" title="Add this note to your favorites">☆</button>
+        <button id="duplicate-btn" class="toolbar-btn" title="Create a copy of this note">📋</button>
+        <button id="download-btn" class="toolbar-btn" title="Download this note as a text file">⬇</button>
+        <button id="copy-link-btn" class="toolbar-btn" title="Copy the note URL to clipboard">🔗</button>
+        <button id="primary-btn" class="btn btn-primary" title="Save changes to this note">💾 Save</button>
       </div>
     </div>
-    <textarea id="note-content" class="note-editor" placeholder="Loading..." maxlength="50000"></textarea>
+    <textarea id="note-content" class="note-editor" placeholder="Loading..." maxlength="50000" title="Edit your note content here"></textarea>
     <p id="note-date" class="note-date"></p>
   </div>
 </main>

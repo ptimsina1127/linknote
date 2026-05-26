@@ -15,7 +15,7 @@
     const btn = document.getElementById('theme-btn');
     if (btn) {
       btn.textContent = theme === 'dark' ? '☀️' : '🌙';
-      btn.title = theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme';
+      btn.title = theme === 'dark' ? 'Switch to light theme for a brighter look' : 'Switch to dark theme for reduced eye strain';
     }
   }
 
