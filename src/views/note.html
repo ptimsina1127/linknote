@@ -18,8 +18,9 @@
 </head>
 <body>
 <nav class="navbar">
-  <a href="/" class="logo">LinkedPad <span class="logo-tagline">An Anonymous Fast Shareable Notepad</span></a>
-  <div class="nav-links">
+    <a href="/" class="logo">LinkedPad <span class="logo-tagline">An Anonymous Fast Shareable Notepad</span></a>
+    <span id="autosave-indicator"></span>
+    <div class="nav-links">
     <a href="/search" title="Search through shared notes">Search</a>
     <a href="/favorites" title="View your favorited notes">Favorites</a>
   </div>
@@ -41,6 +42,7 @@
         <span class="pw-wrapper">
           <button id="password-btn" class="toolbar-btn" title="Protect this note with a password">🔒</button>
           <input type="password" id="password-input" class="pw-inline-input" placeholder="Password (min 4 chars)" maxlength="100">
+          <button id="pw-reveal-btn" class="pw-reveal-btn" title="Show password">👁</button>
         </span>
         <button id="mic-btn" class="toolbar-btn" title="Use speech-to-text to enter content (Chrome/Edge only)" style="display:none">🎤</button>
         <button id="fav-btn" class="toolbar-btn" title="Add this note to your favorites">☆</button>
@@ -72,8 +74,6 @@
     </div>
   </div>
 </main>
-
-<div id="autosave-indicator"></div>
 
 <div id="toast" class="toast hidden"></div>
 

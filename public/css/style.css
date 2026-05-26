@@ -139,7 +139,7 @@ body {
 
 .pw-inline-input.visible {
   width: 160px;
-  padding: 6px 10px;
+  padding: 6px 22px 6px 10px;
   border: 1px solid var(--border);
 }
 
@@ -464,24 +464,48 @@ body {
   }
 }
 
-/* Autosave indicator */
-#autosave-indicator {
-  position: fixed;
-  top: 12px;
-  right: 12px;
+/* Autosave indicator in navbar */
+.navbar #autosave-indicator {
   font-size: 0.75rem;
   color: var(--text-dim);
-  background: var(--surface);
-  padding: 4px 10px;
+  padding: 2px 8px;
   border-radius: var(--radius);
-  border: 1px solid var(--border);
+  background: var(--surface2);
   opacity: 0;
   transition: opacity 0.3s;
-  z-index: 100;
   pointer-events: none;
 }
 
-#autosave-indicator.show { opacity: 1; }
+.navbar #autosave-indicator.show { opacity: 1; }
+
+/* Password reveal button */
+.pw-reveal-btn {
+  position: absolute;
+  right: 2px;
+  bottom: 2px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.8rem;
+  padding: 2px 4px;
+  color: var(--text-dim);
+  z-index: 11;
+  line-height: 1;
+}
+
+.pw-reveal-btn:hover { color: var(--text); }
+
+/* Note link input in toolbar */
+.note-link-input {
+  max-width: 220px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 8px 12px;
+  color: var(--text-dim);
+  font-size: 0.85rem;
+  cursor: default;
+}
 
 /* Scrollbar */
 ::-webkit-scrollbar { width: 8px; }

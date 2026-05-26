@@ -9,6 +9,7 @@
   const unlockError = document.getElementById('unlock-error');
   const passwordBtn = document.getElementById('password-btn');
   const passwordInput = document.getElementById('password-input');
+  const pwRevealBtn = document.getElementById('pw-reveal-btn');
   const favBtn = document.getElementById('fav-btn');
   const duplicateBtn = document.getElementById('duplicate-btn');
   const downloadBtn = document.getElementById('download-btn');
@@ -27,12 +28,14 @@
   let isSaving = false;
   let indicatorTimeout = null;
 
+  pwRevealBtn.style.display = 'none';
   passwordInput.style.display = 'none';
 
   passwordBtn.addEventListener('click', function() {
     if (!noteData) return;
     passwordInput.style.display = '';
     passwordInput.classList.toggle('visible');
+    pwRevealBtn.style.display = passwordInput.classList.contains('visible') ? '' : 'none';
     if (passwordInput.classList.contains('visible')) {
       passwordInput.focus();
     } else {
@@ -40,9 +43,17 @@
     }
   });
 
+  pwRevealBtn.addEventListener('click', function() {
+    const isPassword = passwordInput.type === 'password';
+    passwordInput.type = isPassword ? 'text' : 'password';
+    pwRevealBtn.textContent = isPassword ? '🙈' : '👁';
+    pwRevealBtn.title = isPassword ? 'Hide password' : 'Show password';
+  });
+
   passwordInput.addEventListener('keydown', function(e) {
     if (e.key === 'Enter') {
       passwordInput.classList.remove('visible');
+      pwRevealBtn.style.display = 'none';
       passwordInput.style.display = 'none';
       setPassword();
     }
@@ -50,6 +61,7 @@
 
   passwordInput.addEventListener('blur', function() {
     passwordInput.classList.remove('visible');
+    pwRevealBtn.style.display = 'none';
     passwordInput.style.display = 'none';
     if (passwordInput.value) setPassword();
   });
@@ -74,7 +86,7 @@
       const data = await res.json();
       if (data.success) {
         noteData.is_protected = !!pw;
-        showToast(pw ? 'Password set' : 'Password removed');
+        showIndicator(pw ? 'Password saved' : 'Password removed');
       } else {
         showToast(data.error || 'Failed to set password');
       }
@@ -82,6 +94,9 @@
       showToast('Network error');
     }
     passwordInput.value = '';
+    passwordInput.type = 'password';
+    pwRevealBtn.textContent = '👁';
+    pwRevealBtn.title = 'Show password';
     updatePasswordIcon();
   }
 
