@@ -404,14 +404,30 @@ body {
 
 /* Mic recording indicator */
 .mic-recording {
-  color: var(--primary) !important;
-  animation: pulse 1s infinite;
+  color: #fff !important;
+  background: var(--primary) !important;
   border-color: var(--primary) !important;
+  animation: mic-wave 1.2s ease-in-out infinite;
+  box-shadow: 0 0 12px rgba(233, 69, 96, 0.5);
 }
 
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
+@keyframes mic-wave {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 8px rgba(233, 69, 96, 0.4);
+  }
+  25% {
+    transform: scale(1.08);
+    box-shadow: 0 0 16px rgba(233, 69, 96, 0.6);
+  }
+  50% {
+    transform: scale(0.96);
+    box-shadow: 0 0 12px rgba(233, 69, 96, 0.5);
+  }
+  75% {
+    transform: scale(1.04);
+    box-shadow: 0 0 20px rgba(233, 69, 96, 0.7);
+  }
 }
 
 /* Lock icon on protected notes */

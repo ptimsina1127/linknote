@@ -1,6 +1,5 @@
 (function() {
   const SpeechRecognition = window.webkitSpeechRecognition || window.SpeechRecognition;
-
   if (!SpeechRecognition) return;
 
   const micBtn = document.getElementById('mic-btn');
@@ -12,8 +11,9 @@
   let recognition = null;
   let silenceTimer = null;
   let lastResultIndex = -1;
+  let committedPos = -1;
 
-  const SILENCE_TIMEOUT = 3000;
+  const SILENCE_TIMEOUT = 1500;
 
   const commandMap = {
     'enter': '\n',
@@ -39,50 +39,88 @@
     return text;
   }
 
-  function insertText(text) {
-    const textarea = document.getElementById('note-content');
+  function getTextarea() {
+    return document.getElementById('note-content');
+  }
+
+  function removeInterimText() {
+    const textarea = getTextarea();
+    if (!textarea || committedPos === -1) return;
+    textarea.value = textarea.value.substring(0, committedPos);
+  }
+
+  function insertFinal(text) {
+    const textarea = getTextarea();
     if (!textarea) return;
 
-    const start = textarea.selectionStart;
-    const end = textarea.selectionEnd;
-    const before = textarea.value.substring(0, start);
-    const after = textarea.value.substring(end);
+    if (committedPos === -1) {
+      committedPos = textarea.selectionStart;
+    }
 
+    removeInterimText();
+
+    const before = textarea.value.substring(0, committedPos);
+    const after = textarea.value.substring(committedPos);
     textarea.value = before + text + after;
-    textarea.selectionStart = textarea.selectionEnd = start + text.length;
+    committedPos += text.length;
+    textarea.selectionStart = textarea.selectionEnd = committedPos;
+    textarea.dispatchEvent(new Event('input'));
+    textarea.focus();
+  }
+
+  function showInterim(text) {
+    const textarea = getTextarea();
+    if (!textarea) return;
+
+    if (committedPos === -1) {
+      committedPos = textarea.selectionStart;
+    }
+
+    removeInterimText();
+
+    const before = textarea.value.substring(0, committedPos);
+    textarea.value = before + text;
+    textarea.selectionStart = textarea.selectionEnd = committedPos + text.length;
     textarea.dispatchEvent(new Event('input'));
     textarea.focus();
   }
 
   function resetSilenceTimer() {
     if (silenceTimer) clearTimeout(silenceTimer);
-    silenceTimer = setTimeout(function() {
-      stopListening();
-    }, SILENCE_TIMEOUT);
+    silenceTimer = setTimeout(stopListening, SILENCE_TIMEOUT);
   }
 
   function startListening() {
+    committedPos = -1;
+    lastResultIndex = -1;
+
     recognition = new SpeechRecognition();
     recognition.lang = 'en-US';
     recognition.interimResults = true;
     recognition.continuous = true;
     recognition.maxAlternatives = 1;
 
-    lastResultIndex = -1;
-
     recognition.onresult = function(event) {
       resetSilenceTimer();
 
-      for (let i = event.resultIndex; i < event.results.length; i++) {
-        if (!event.results[i].isFinal) continue;
-        if (i <= lastResultIndex) continue;
+      let interim = '';
 
-        lastResultIndex = i;
+      for (let i = event.resultIndex; i < event.results.length; i++) {
         const transcript = event.results[i][0].transcript;
-        const processed = processTranscript(transcript);
-        if (processed) {
-          insertText(processed);
+
+        if (event.results[i].isFinal && i > lastResultIndex) {
+          lastResultIndex = i;
+          const processed = processTranscript(transcript);
+          if (processed) {
+            insertFinal(processed);
+          }
+        } else if (!event.results[i].isFinal) {
+          interim += transcript;
         }
+      }
+
+      if (interim) {
+        showInterim(interim);
       }
     };
 
@@ -97,6 +135,14 @@
 
     recognition.onend = function() {
       if (isListening) {
+        const textarea = getTextarea();
+        if (textarea && committedPos > -1 && textarea.value.length > committedPos) {
+          const pending = textarea.value.substring(committedPos);
+          if (pending.trim()) {
+            const processed = processTranscript(pending);
+            insertFinal(processed);
+          }
+        }
         stopListening();
       }
     };
@@ -107,7 +153,7 @@
       micBtn.classList.add('mic-recording');
       micBtn.textContent = '🔴';
       micBtn.title = 'Listening... speak now';
-    } catch(e) {
+    } catch (e) {
       stopListening();
     }
   }
@@ -118,10 +164,11 @@
       silenceTimer = null;
     }
     if (recognition) {
-      try { recognition.stop(); } catch(e) {}
+      try { recognition.stop(); } catch (e) {}
       recognition = null;
     }
     isListening = false;
+    committedPos = -1;
     micBtn.classList.remove('mic-recording');
     micBtn.textContent = '🎤';
     micBtn.title = 'Speech-to-text (Chrome/Edge only)';
