@@ -1,7 +1,6 @@
 (function() {
   const content = document.getElementById('note-content');
   const titleInput = document.getElementById('title-input');
-  const noteLinkInput = document.getElementById('note-link-input');
   const passwordBtn = document.getElementById('password-btn');
   const passwordInput = document.getElementById('password-input');
   const pwRevealBtn = document.getElementById('pw-reveal-btn');
@@ -170,8 +169,7 @@
       primaryBtn.textContent = 'Share';
 
       const url = window.location.origin + '/note/' + data.short_id;
-      noteLinkInput.style.display = '';
-      noteLinkInput.value = url;
+      history.replaceState(null, '', '/note/' + data.short_id);
 
       openShareModal(data.short_id);
     } catch (err) {

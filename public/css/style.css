@@ -495,18 +495,6 @@ body {
 
 .pw-reveal-btn:hover { color: var(--text); }
 
-/* Note link input in toolbar */
-.note-link-input {
-  max-width: 220px;
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 8px 12px;
-  color: var(--text-dim);
-  font-size: 0.85rem;
-  cursor: default;
-}
-
 /* Scrollbar */
 ::-webkit-scrollbar { width: 8px; }
 ::-webkit-scrollbar-track { background: var(--bg); }
