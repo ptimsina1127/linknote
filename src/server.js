@@ -50,5 +50,5 @@ app.use((err, req, res, next) => {
 });
 
 app.listen(config.port, () => {
-  console.log(`LinkNote running on ${config.baseUrl}`);
+  console.log(`LinkedPad running on ${config.baseUrl}`);
 });

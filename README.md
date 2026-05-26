@@ -1,8 +1,10 @@
-# LinkNote - Anonymous Online Notepad
+# LinkedPad - A Fast Shareable Notepad
 
 A minimal, anonymous notepad web app. Create a note, get a short 5-character link, and share it with anyone. No sign-up required.
 
 **Live at**: [https://linkedpad.me](https://linkedpad.me)
+
+**Previously known as**: LinkNote
 
 ---
 
