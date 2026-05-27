@@ -9,9 +9,13 @@ const apiRouter = require('./routes/api');
 const sitemapRouter = require('./routes/sitemap');
 const { getNote } = require('./routes/noteUtils');
 
+const { Resvg } = require('@resvg/resvg-js');
+
 const app = express();
 
-
+let ogImageCache = null;
+let ogImageCacheTime = 0;
+const OG_CACHE_TTL = 24 * 60 * 60 * 1000;
 
 app.use(helmet({ contentSecurityPolicy: false }));
 app.use(express.json({ limit: '50kb' }));
@@ -34,6 +38,29 @@ app.get('/robots.txt', (req, res) => {
 Allow: /
 Sitemap: ${config.baseUrl}/sitemap.xml
 `);
+});
+
+app.get('/og-image.png', (req, res) => {
+  const now = Date.now();
+  if (ogImageCache && (now - ogImageCacheTime < OG_CACHE_TTL)) {
+    res.setHeader('Content-Type', 'image/png');
+    res.setHeader('Cache-Control', 'public, max-age=86400');
+    res.send(ogImageCache);
+    return;
+  }
+  try {
+    const svg = fs.readFileSync(path.join(__dirname, '..', 'public', 'og-image.svg'), 'utf-8');
+    const resvg = new Resvg(svg, { fitTo: { mode: 'width', value: 1200 } });
+    const png = resvg.render().asPng();
+    ogImageCache = png;
+    ogImageCacheTime = now;
+    res.setHeader('Content-Type', 'image/png');
+    res.setHeader('Cache-Control', 'public, max-age=86400');
+    res.send(png);
+  } catch (e) {
+    console.error('OG image render error:', e);
+    res.status(500).send('OG image error');
+  }
 });
 
 function loadHtml(file) {
