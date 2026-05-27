@@ -12,12 +12,8 @@ const { getNote } = require('./routes/noteUtils');
 
 const app = express();
 
-// Convert OG image SVG to PNG at startup
-const svgPath = path.join(__dirname, '..', 'public', 'og-image.svg');
-const pngPath = path.join(__dirname, '..', 'public', 'og-image.png');
-if (fs.existsSync(svgPath)) {
-  sharp(svgPath).resize(1200, 630).png().toFile(pngPath).catch(() => {});
-}
+// OG image cache
+let ogImagePng = null;
 
 app.use(helmet({ contentSecurityPolicy: false }));
 app.use(express.json({ limit: '50kb' }));
@@ -110,6 +106,21 @@ app.get('/search', (req, res) => {
 
 app.get('/404', (req, res) => {
   res.status(404).send(NOTE_404_HTML);
+});
+
+app.get('/og-image.png', async (req, res) => {
+  if (!ogImagePng) {
+    const svgPath = path.join(__dirname, '..', 'public', 'og-image.svg');
+    if (!fs.existsSync(svgPath)) return res.status(404).end();
+    try {
+      ogImagePng = await sharp(fs.readFileSync(svgPath)).resize(1200, 630).png().toBuffer();
+    } catch {
+      return res.status(500).end();
+    }
+  }
+  res.setHeader('Content-Type', 'image/png');
+  res.setHeader('Cache-Control', 'public, max-age=86400');
+  res.send(ogImagePng);
 });
 
 app.use((err, req, res, next) => {
