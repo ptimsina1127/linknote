@@ -27,19 +27,6 @@ app.use(session({
   cookie: { sameSite: 'strict' },
 }));
 
-app.use(express.static(path.join(__dirname, '..', 'public')));
-
-app.use('/api', apiRouter);
-app.use('/', sitemapRouter);
-
-app.get('/robots.txt', (req, res) => {
-  res.setHeader('Content-Type', 'text/plain');
-  res.send(`User-agent: *
-Allow: /
-Sitemap: ${config.baseUrl}/sitemap.xml
-`);
-});
-
 app.get('/og-image.png', (req, res) => {
   const now = Date.now();
   if (ogImageCache && (now - ogImageCacheTime < OG_CACHE_TTL)) {
@@ -61,6 +48,19 @@ app.get('/og-image.png', (req, res) => {
     console.error('OG image render error:', e);
     res.status(500).send('OG image error');
   }
+});
+
+app.use(express.static(path.join(__dirname, '..', 'public')));
+
+app.use('/api', apiRouter);
+app.use('/', sitemapRouter);
+
+app.get('/robots.txt', (req, res) => {
+  res.setHeader('Content-Type', 'text/plain');
+  res.send(`User-agent: *
+Allow: /
+Sitemap: ${config.baseUrl}/sitemap.xml
+`);
 });
 
 function loadHtml(file) {
