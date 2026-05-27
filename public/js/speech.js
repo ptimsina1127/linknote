@@ -129,7 +129,6 @@
         resetSilenceTimer();
         return;
       }
-      console.warn('Speech error:', event.error);
       stopListening();
     };
 

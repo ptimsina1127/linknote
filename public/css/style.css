@@ -344,8 +344,6 @@ body {
 .error { color: var(--primary); font-size: 0.85rem; margin-top: 8px; }
 .hidden { display: none !important; }
 
-/* note-date is now styled inside .note-view-page */
-
 /* Search page */
 .page-center {
   flex: 1;

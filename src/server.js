@@ -1,7 +1,6 @@
 const express = require('express');
 const session = require('express-session');
 const helmet = require('helmet');
-const rateLimit = require('express-rate-limit');
 const path = require('path');
 const fs = require('fs');
 const config = require('./config');

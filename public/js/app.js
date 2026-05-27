@@ -8,7 +8,6 @@
   const downloadBtn = document.getElementById('download-btn');
   const favBtn = document.getElementById('fav-btn');
   const duplicateBtn = document.getElementById('duplicate-btn');
-  const toast = document.getElementById('toast');
   const shareModal = document.getElementById('share-modal');
   const shareLink = document.getElementById('share-link');
   const copyShareLink = document.getElementById('copy-share-link');
@@ -220,10 +219,4 @@
     }
   }
 
-  function showToast(msg) {
-    toast.textContent = msg;
-    toast.classList.remove('hidden');
-    clearTimeout(toast._timeout);
-    toast._timeout = setTimeout(() => toast.classList.add('hidden'), 2500);
-  }
 })();

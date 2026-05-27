@@ -1,4 +1,5 @@
 const express = require('express');
+const db = require('../database');
 const { getNoteCount } = require('./noteUtils');
 const config = require('../config');
 
@@ -29,7 +30,6 @@ function buildSitemapIndex() {
 }
 
 function buildSitemapPage(page) {
-  const db = require('../database');
   const offset = (page - 1) * PER_PAGE;
   const notes = db.prepare(
     'SELECT short_id, created_at FROM notes WHERE is_protected = 0 ORDER BY id ASC LIMIT ? OFFSET ?'
@@ -60,12 +60,6 @@ function buildHomeSitemap() {
   xml += `  <url><loc>${baseUrl}/favorites</loc><priority>0.3</priority></url>\n`;
   xml += '</urlset>';
   return xml;
-}
-
-function invalidateCache() {
-  sitemapCache = null;
-  sitemapPageCache = {};
-  lastCacheTime = 0;
 }
 
 router.get('/sitemap.xml', (req, res) => {

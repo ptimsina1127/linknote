@@ -96,7 +96,6 @@ function updateNote(shortId, title, content, password) {
 }
 
 module.exports = {
-  generateShortId,
   createNote,
   getNote,
   verifyPassword,

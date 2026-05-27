@@ -14,7 +14,6 @@
   const duplicateBtn = document.getElementById('duplicate-btn');
   const downloadBtn = document.getElementById('download-btn');
   const shareBtn = document.getElementById('share-btn');
-  const toast = document.getElementById('toast');
   const shareModal = document.getElementById('share-modal');
   const shareLink = document.getElementById('share-link');
   const copyShareLink = document.getElementById('copy-share-link');
@@ -300,13 +299,6 @@
   shareModal.addEventListener('click', function(e) {
     if (e.target === shareModal) shareModal.classList.add('hidden');
   });
-
-  function showToast(msg) {
-    toast.textContent = msg;
-    toast.classList.remove('hidden');
-    clearTimeout(toast._timeout);
-    toast._timeout = setTimeout(() => toast.classList.add('hidden'), 2500);
-  }
 
   loadNote();
 })();
