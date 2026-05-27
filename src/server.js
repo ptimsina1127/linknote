@@ -4,7 +4,6 @@ const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const path = require('path');
 const fs = require('fs');
-const { Resvg } = require('@resvg/resvg-js');
 const config = require('./config');
 const apiRouter = require('./routes/api');
 const sitemapRouter = require('./routes/sitemap');
@@ -12,8 +11,7 @@ const { getNote } = require('./routes/noteUtils');
 
 const app = express();
 
-// OG image cache
-let ogImagePng = null;
+
 
 app.use(helmet({ contentSecurityPolicy: false }));
 app.use(express.json({ limit: '50kb' }));
@@ -108,22 +106,7 @@ app.get('/404', (req, res) => {
   res.status(404).send(NOTE_404_HTML);
 });
 
-app.get('/og-image.png', async (req, res) => {
-  if (!ogImagePng) {
-    const svgPath = path.join(__dirname, '..', 'public', 'og-image.svg');
-    if (!fs.existsSync(svgPath)) return res.status(404).end();
-    try {
-      const svg = fs.readFileSync(svgPath, 'utf-8');
-      const resvg = new Resvg(svg, { fitTo: { mode: 'width', value: 1200 } });
-      ogImagePng = resvg.render().asPng();
-    } catch {
-      return res.status(500).end();
-    }
-  }
-  res.setHeader('Content-Type', 'image/png');
-  res.setHeader('Cache-Control', 'public, max-age=86400');
-  res.send(ogImagePng);
-});
+
 
 app.use((err, req, res, next) => {
   console.error(err.stack);
