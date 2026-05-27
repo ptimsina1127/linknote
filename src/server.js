@@ -69,7 +69,9 @@ Sitemap: ${config.baseUrl}/sitemap.xml
 
 function loadHtml(file) {
   const html = fs.readFileSync(path.join(__dirname, '..', 'src', 'views', file), 'utf-8');
-  return html.replace(/__BASE__/g, config.baseUrl);
+  return html
+    .replace(/__BASE__/g, config.baseUrl)
+    .replace(/__FB_APP_ID__/g, config.fbAppId);
 }
 
 const INDEX_HTML = loadHtml('index.html');
@@ -120,7 +122,8 @@ app.get('/note/:id', (req, res) => {
     .replace(/__OG_DESC__/g, desc.replace(/"/g, '&quot;'))
     .replace(/__OG_IMAGE__/g, ogImage)
     .replace(/__OG_URL__/g, ogUrl)
-    .replace('__JSON_LD__', jsonLd);
+    .replace('__JSON_LD__', jsonLd)
+    .replace(/__FB_APP_ID__/g, config.fbAppId);
 
   res.send(html);
 });
