@@ -4,7 +4,7 @@ const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const path = require('path');
 const fs = require('fs');
-const sharp = require('sharp');
+const { Resvg } = require('@resvg/resvg-js');
 const config = require('./config');
 const apiRouter = require('./routes/api');
 const sitemapRouter = require('./routes/sitemap');
@@ -113,7 +113,9 @@ app.get('/og-image.png', async (req, res) => {
     const svgPath = path.join(__dirname, '..', 'public', 'og-image.svg');
     if (!fs.existsSync(svgPath)) return res.status(404).end();
     try {
-      ogImagePng = await sharp(fs.readFileSync(svgPath)).resize(1200, 630).png().toBuffer();
+      const svg = fs.readFileSync(svgPath, 'utf-8');
+      const resvg = new Resvg(svg, { fitTo: { mode: 'width', value: 1200 } });
+      ogImagePng = resvg.render().asPng();
     } catch {
       return res.status(500).end();
     }
