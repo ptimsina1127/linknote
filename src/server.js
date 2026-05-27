@@ -37,7 +37,11 @@ app.get('/og-image.png', (req, res) => {
   }
   try {
     const svg = fs.readFileSync(path.join(__dirname, '..', 'public', 'og-image.svg'), 'utf-8');
-    const resvg = new Resvg(svg, { fitTo: { mode: 'width', value: 1200 } });
+    const fontPath = path.join(__dirname, '..', 'public', 'Inter-Bold.ttf');
+    const resvg = new Resvg(svg, {
+      fitTo: { mode: 'width', value: 1200 },
+      font: { fontFiles: [fontPath], loadSystemFonts: false },
+    });
     const png = resvg.render().asPng();
     ogImageCache = png;
     ogImageCacheTime = now;
