@@ -53,6 +53,51 @@ app.get('/og-image.png', (req, res) => {
   }
 });
 
+// Favicon rendering
+let faviconCache = {};
+let faviconCacheTime = 0;
+
+app.get('/favicon.ico', (req, res) => {
+  res.redirect('/favicon.svg');
+});
+
+app.get('/favicon-16x16.png', (req, res) => {
+  renderFaviconPng(req, res, 16);
+});
+
+app.get('/favicon-32x32.png', (req, res) => {
+  renderFaviconPng(req, res, 32);
+});
+
+app.get('/apple-touch-icon.png', (req, res) => {
+  renderFaviconPng(req, res, 180);
+});
+
+function renderFaviconPng(req, res, size) {
+  const now = Date.now();
+  if (faviconCache[size] && (now - faviconCacheTime < OG_CACHE_TTL)) {
+    res.setHeader('Content-Type', 'image/png');
+    res.setHeader('Cache-Control', 'public, max-age=86400');
+    res.send(faviconCache[size]);
+    return;
+  }
+  try {
+    const svg = fs.readFileSync(path.join(__dirname, '..', 'public', 'favicon.svg'), 'utf-8');
+    const resvg = new Resvg(svg, {
+      fitTo: { mode: 'width', value: size },
+    });
+    const png = resvg.render().asPng();
+    faviconCache[size] = png;
+    faviconCacheTime = now;
+    res.setHeader('Content-Type', 'image/png');
+    res.setHeader('Cache-Control', 'public, max-age=86400');
+    res.send(png);
+  } catch (e) {
+    console.error('Favicon render error:', e);
+    res.status(500).send('Favicon error');
+  }
+}
+
 app.use(express.static(path.join(__dirname, '..', 'public')));
 
 app.use('/api', apiRouter);
@@ -96,8 +141,8 @@ app.get('/note/:id', (req, res) => {
   }
 
   const title = note.title
-    ? `${note.title} - LinkedPad`
-    : 'LinkedPad - An Anonymous and Shareable Online Notepad';
+    ? `${note.title} - LinkedPad Anonymous Shared Notepad`
+    : 'Anonymous Shared Notepad - LinkedPad | Share Notes Instantly';
 
   let desc;
   if (note.is_protected) {
