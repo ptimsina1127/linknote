@@ -26,6 +26,15 @@ app.use(session({
   cookie: { sameSite: 'strict' },
 }));
 
+// Redirect naked domain to www (only in production)
+app.use((req, res, next) => {
+  const host = req.headers.host;
+  if (host === 'linkedpad.me') {
+    return res.redirect(301, `https://www.linkedpad.me${req.url}`);
+  }
+  next();
+});
+
 app.get('/og-image.png', (req, res) => {
   const now = Date.now();
   if (ogImageCache && (now - ogImageCacheTime < OG_CACHE_TTL)) {
