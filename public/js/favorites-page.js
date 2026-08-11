@@ -29,9 +29,9 @@
 
       const meta = document.createElement('div');
       meta.className = 'note-card-meta';
-      meta.textContent = `${note.short_id} · ${new Date(note.created_at).toLocaleDateString()}`;
+      meta.innerHTML = `${note.short_id} · ${new Date(note.created_at).toLocaleDateString()}`;
       if (note.is_protected) {
-        meta.textContent += ' 🔒';
+        meta.innerHTML += ' ' + ICONS.lock;
       }
 
       info.appendChild(title);

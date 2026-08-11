@@ -14,7 +14,7 @@
     document.documentElement.setAttribute('data-theme', theme);
     const btn = document.getElementById('theme-btn');
     if (btn) {
-      btn.textContent = theme === 'dark' ? '☀️' : '🌙';
+      btn.innerHTML = theme === 'dark' ? ICONS.sun : ICONS.moon;
       btn.title = theme === 'dark' ? 'Switch to light theme for a brighter look' : 'Switch to dark theme for reduced eye strain';
     }
   }

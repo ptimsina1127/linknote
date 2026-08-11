@@ -41,13 +41,13 @@
     <a href="/search" class="active" title="Search through shared notes">Search</a>
     <a href="/favorites" title="View your favorited notes">Favorites</a>
   </div>
-  <button id="theme-btn" class="toolbar-btn" title="Switch between light and dark theme">🌙</button>
+  <button id="theme-btn" class="toolbar-btn" title="Switch between light and dark theme" aria-label="Switch between light and dark theme" data-icon="moon"></button>
 </nav>
 <main class="page-center">
   <h1>Search Anonymous Shared Notes</h1>
   <div class="search-bar">
     <input type="text" id="search-input" placeholder="Search notes..." autofocus title="Type words to search notes. Multiple words = all must match">
-    <button id="sort-btn" class="toolbar-btn" title="Toggle between newest first and oldest first">↓ Newest</button>
+    <button id="sort-btn" class="toolbar-btn" title="Toggle between newest first and oldest first" aria-label="Toggle between newest first and oldest first" data-icon="arrowDown"></button>
   </div>
   <div id="search-results" class="notes-list">
     <p class="hint">Start typing to search notes</p>
@@ -55,6 +55,7 @@
   <div id="pagination" class="pagination hidden"></div>
 </main>
 
+<script src="/js/icons.js"></script>
 <script src="/js/theme.js"></script>
 <script src="/js/favorites.js"></script>
 <script src="/js/search.js"></script>

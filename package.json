@@ -4,7 +4,9 @@
   "main": "src/server.js",
   "scripts": {
     "start": "node src/server.js",
-    "dev": "node --watch src/server.js"
+    "dev": "node --watch src/server.js",
+    "kill": "node scripts/kill-port.js",
+    "restart": "npm run kill && npm run dev"
   },
   "dependencies": {
     "@resvg/resvg-js": "^2.6.2",

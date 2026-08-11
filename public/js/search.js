@@ -94,7 +94,8 @@
 
     const prevBtn = document.createElement('button');
     prevBtn.className = 'btn';
-    prevBtn.textContent = '← Previous';
+    prevBtn.innerHTML = ICONS.arrowLeft;
+    prevBtn.setAttribute('aria-label', 'Previous page');
     prevBtn.disabled = page <= 1;
     prevBtn.addEventListener('click', () => {
       if (currentPage > 1) {
@@ -110,7 +111,8 @@
 
     const nextBtn = document.createElement('button');
     nextBtn.className = 'btn';
-    nextBtn.textContent = 'Next →';
+    nextBtn.innerHTML = ICONS.arrowRight;
+    nextBtn.setAttribute('aria-label', 'Next page');
     nextBtn.disabled = page >= total;
     nextBtn.addEventListener('click', () => {
       if (currentPage < total) {
@@ -139,7 +141,8 @@
 
   sortBtn.addEventListener('click', function() {
     currentSort = currentSort === 'desc' ? 'asc' : 'desc';
-    sortBtn.textContent = currentSort === 'desc' ? '↓ Newest' : '↑ Oldest';
+    sortBtn.innerHTML = currentSort === 'desc' ? ICONS.arrowDown : ICONS.arrowUp;
+    sortBtn.title = currentSort === 'desc' ? 'Newest first. Click for oldest first' : 'Oldest first. Click for newest first';
     currentPage = 1;
     doSearch();
   });

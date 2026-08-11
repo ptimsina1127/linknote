@@ -150,7 +150,7 @@
       recognition.start();
       isListening = true;
       micBtn.classList.add('mic-recording');
-      micBtn.textContent = '🔴';
+      micBtn.innerHTML = ICONS.mic;
       micBtn.title = 'Listening... speak now';
     } catch (e) {
       stopListening();
@@ -169,7 +169,7 @@
     isListening = false;
     committedPos = -1;
     micBtn.classList.remove('mic-recording');
-    micBtn.textContent = '🎤';
+    micBtn.innerHTML = ICONS.mic;
     micBtn.title = 'Speech-to-text (Chrome/Edge only)';
   }
 

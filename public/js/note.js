@@ -1,15 +1,17 @@
 (function() {
-  const unlockPrompt = document.getElementById('unlock-prompt');
   const noteContainer = document.getElementById('note-container');
   const titleInput = document.getElementById('title-input');
   const noteContent = document.getElementById('note-content');
   const noteDate = document.getElementById('note-date');
-  const unlockPassword = document.getElementById('unlock-password');
-  const unlockBtn = document.getElementById('unlock-btn');
-  const unlockError = document.getElementById('unlock-error');
   const passwordBtn = document.getElementById('password-btn');
+  const pwPopup = document.getElementById('pw-popup');
   const passwordInput = document.getElementById('password-input');
   const pwRevealBtn = document.getElementById('pw-reveal-btn');
+  const pwOkBtn = document.getElementById('pw-ok-btn');
+  const pwDialog = document.getElementById('pw-dialog');
+  const pwDialogTitle = document.getElementById('pw-dialog-title');
+  const pwDialogMsg = document.getElementById('pw-dialog-msg');
+  const pwDialogOk = document.getElementById('pw-dialog-ok');
   const favBtn = document.getElementById('fav-btn');
   const duplicateBtn = document.getElementById('duplicate-btn');
   const downloadBtn = document.getElementById('download-btn');
@@ -19,6 +21,10 @@
   const copyShareLink = document.getElementById('copy-share-link');
   const closeShareModal = document.getElementById('close-share-modal');
   const autosaveIndicator = document.getElementById('autosave-indicator');
+  const lockScreen = document.getElementById('lock-screen');
+  const lockPasswordInput = document.getElementById('lock-password-input');
+  const lockUnlockBtn = document.getElementById('lock-unlock-btn');
+  const lockError = document.getElementById('lock-error');
 
   const shortId = window.location.pathname.split('/note/')[1] || '';
 
@@ -26,50 +32,135 @@
   let saveTimeout = null;
   let isSaving = false;
   let indicatorTimeout = null;
+  let dirty = false;
+  let pending = false;
+  let retryTimeout = null;
 
-  pwRevealBtn.style.display = 'none';
-  passwordInput.style.display = 'none';
+  function openPwPopup() {
+    passwordInput.placeholder = isUnlockMode() ? 'Enter password' : 'Password (min 4 chars)';
+    pwPopup.classList.add('visible');
+    passwordInput.focus();
+  }
+
+  function closePwPopup() {
+    pwPopup.classList.remove('visible');
+  }
+
+  passwordBtn.addEventListener('mousedown', function(e) { e.preventDefault(); });
+  pwRevealBtn.addEventListener('mousedown', function(e) { e.preventDefault(); });
+  pwOkBtn.addEventListener('mousedown', function(e) { e.preventDefault(); });
+  lockUnlockBtn.addEventListener('mousedown', function(e) { e.preventDefault(); });
+
+  lockUnlockBtn.addEventListener('click', unlockLockedNote);
+
+  lockPasswordInput.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      unlockLockedNote();
+    }
+  });
 
   passwordBtn.addEventListener('click', function() {
     if (!noteData) return;
-    passwordInput.style.display = '';
-    passwordInput.classList.toggle('visible');
-    pwRevealBtn.style.display = passwordInput.classList.contains('visible') ? '' : 'none';
-    if (passwordInput.classList.contains('visible')) {
-      passwordInput.focus();
+    if (pwPopup.classList.contains('visible')) {
+      closePwPopup();
     } else {
-      passwordInput.style.display = 'none';
+      openPwPopup();
     }
   });
 
   pwRevealBtn.addEventListener('click', function() {
     const isPassword = passwordInput.type === 'password';
     passwordInput.type = isPassword ? 'text' : 'password';
-    pwRevealBtn.textContent = isPassword ? '🙈' : '👁';
+    pwRevealBtn.innerHTML = isPassword ? ICONS.eyeOff : ICONS.eye;
     pwRevealBtn.title = isPassword ? 'Hide password' : 'Show password';
+    passwordInput.focus();
   });
 
   passwordInput.addEventListener('keydown', function(e) {
     if (e.key === 'Enter') {
-      passwordInput.classList.remove('visible');
-      pwRevealBtn.style.display = 'none';
-      passwordInput.style.display = 'none';
-      setPassword();
+      e.preventDefault();
+      if (isUnlockMode()) {
+        unlockNote();
+      } else {
+        setPassword();
+      }
     }
   });
 
   passwordInput.addEventListener('blur', function() {
-    passwordInput.classList.remove('visible');
-    pwRevealBtn.style.display = 'none';
-    passwordInput.style.display = 'none';
-    if (passwordInput.value) setPassword();
+    if (isUnlockMode()) {
+      closePwPopup();
+      passwordInput.value = '';
+      return;
+    }
+    if (passwordInput.value && passwordInput.value.length < 4) {
+      showToast('Password must be at least 4 characters');
+      passwordInput.value = '';
+      closePwPopup();
+      updatePasswordIcon();
+      return;
+    }
+    if (passwordInput.value) {
+      setPassword();
+    } else {
+      closePwPopup();
+    }
   });
+
+  pwOkBtn.addEventListener('click', function() {
+    if (isUnlockMode()) {
+      unlockNote();
+    } else {
+      setPassword();
+    }
+  });
+
+  function isUnlockMode() {
+    return !!(noteData && noteData.is_protected);
+  }
+
+  async function unlockNote() {
+    const pw = passwordInput.value;
+    if (!pw) return;
+
+    try {
+      const res = await fetch(`/api/note/${shortId}/unlock`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: pw }),
+      });
+      const data = await res.json();
+
+      if (res.ok && data.success) {
+        noteData.content = data.content;
+        noteData.title = data.title || '';
+        noteData.is_protected = false;
+        noteData.verified = true;
+        closePwPopup();
+        passwordInput.value = '';
+        passwordInput.type = 'password';
+        pwRevealBtn.innerHTML = ICONS.eye;
+        pwRevealBtn.title = 'Show password';
+        renderNote();
+        showToast('Note unlocked');
+      } else {
+        showToast(data.error || 'Incorrect password');
+        passwordInput.value = '';
+        passwordInput.focus();
+      }
+    } catch {
+      showToast('Network error');
+    }
+  }
 
   async function setPassword() {
     const pw = passwordInput.value;
     if (pw && pw.length < 4) {
       showToast('Password must be at least 4 characters');
       passwordInput.value = '';
+      closePwPopup();
+      updatePasswordIcon();
       return;
     }
     try {
@@ -85,26 +176,46 @@
       const data = await res.json();
       if (data.success) {
         noteData.is_protected = !!pw;
-        showIndicator(pw ? 'Password saved' : 'Password removed');
+        noteData.verified = true;
+        if (pw) {
+          showPwDialog('Password set', 'This note is now protected with a password.');
+        } else {
+          showToast('Password removed');
+        }
       } else {
         showToast(data.error || 'Failed to set password');
       }
     } catch {
       showToast('Network error');
     }
+    closePwPopup();
     passwordInput.value = '';
     passwordInput.type = 'password';
-    pwRevealBtn.textContent = '👁';
+    pwRevealBtn.innerHTML = ICONS.eye;
     pwRevealBtn.title = 'Show password';
     updatePasswordIcon();
   }
 
+  function showPwDialog(title, msg) {
+    pwDialogTitle.textContent = title;
+    pwDialogMsg.textContent = msg;
+    pwDialog.classList.remove('hidden');
+  }
+
+  pwDialogOk.addEventListener('click', function() {
+    pwDialog.classList.add('hidden');
+  });
+
+  pwDialog.addEventListener('click', function(e) {
+    if (e.target === pwDialog) pwDialog.classList.add('hidden');
+  });
+
   function updatePasswordIcon() {
     if (noteData && noteData.is_protected) {
-      passwordBtn.textContent = '🔓';
-      passwordBtn.title = 'Password is set. Click to change';
+      passwordBtn.innerHTML = ICONS.lock;
+      passwordBtn.title = 'This note is locked. Click to unlock';
     } else {
-      passwordBtn.textContent = '🔒';
+      passwordBtn.innerHTML = ICONS.lockOpen;
       passwordBtn.title = 'Protect this note with a password';
     }
   }
@@ -119,7 +230,7 @@
       noteData = await res.json();
 
       if (noteData.is_protected && !noteData.verified) {
-        unlockPrompt.classList.remove('hidden');
+        renderProtected();
         return;
       }
 
@@ -129,10 +240,55 @@
     }
   }
 
-  function renderNote() {
-    unlockPrompt.classList.add('hidden');
-    noteContainer.classList.remove('hidden');
+  async function unlockLockedNote() {
+    const pw = lockPasswordInput.value;
+    if (!pw) return;
+    lockUnlockBtn.disabled = true;
+    try {
+      const res = await fetch(`/api/note/${shortId}/verify`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: pw }),
+      });
+      const data = await res.json();
 
+      if (res.ok && data.success) {
+        noteData.content = data.content;
+        noteData.title = data.title || '';
+        noteData.verified = true;
+        lockScreen.classList.add('hidden');
+        lockError.classList.add('hidden');
+        noteContainer.classList.remove('hidden');
+        renderNote();
+      } else {
+        lockError.textContent = res.status === 429
+          ? 'Too many attempts. Please wait a minute.'
+          : (data.error || 'Incorrect password');
+        lockError.classList.remove('hidden');
+        lockPasswordInput.value = '';
+        lockPasswordInput.focus();
+      }
+    } catch {
+      lockError.textContent = 'Network error';
+      lockError.classList.remove('hidden');
+    } finally {
+      lockUnlockBtn.disabled = false;
+    }
+  }
+
+  function renderProtected() {
+    noteContainer.classList.add('hidden');
+    lockScreen.classList.remove('hidden');
+    lockError.classList.add('hidden');
+    lockPasswordInput.value = '';
+    updatePasswordIcon();
+    lockPasswordInput.focus();
+  }
+
+  function renderNote() {
+    noteContainer.classList.remove('hidden');
+    noteContent.readOnly = false;
+    noteContent.placeholder = 'Edit your note content here';
     titleInput.value = noteData.title || '';
     noteContent.value = noteData.content;
     noteDate.textContent = 'Created: ' + new Date(noteData.created_at).toLocaleString();
@@ -143,26 +299,44 @@
 
   function updateFavStar() {
     const isFav = window.Favorites.isFav(shortId);
-    favBtn.textContent = isFav ? '★' : '☆';
+    favBtn.innerHTML = isFav ? ICONS.starFilled : ICONS.star;
     favBtn.title = isFav ? 'Remove from favorites' : 'Add to favorites';
     favBtn.classList.toggle('active', isFav);
   }
 
   function debounceSave() {
     clearTimeout(saveTimeout);
+    clearTimeout(retryTimeout);
+    if (!noteContent.value.trim()) {
+      clearTimeout(indicatorTimeout);
+      dirty = false;
+      autosaveIndicator.classList.remove('show');
+      return;
+    }
+    dirty = true;
     showIndicator('Saving...');
-    saveTimeout = setTimeout(autosave, 2000);
+    saveTimeout = setTimeout(autosave, 1000);
   }
 
   titleInput.addEventListener('input', debounceSave);
   noteContent.addEventListener('input', debounceSave);
 
   async function autosave() {
-    if (isSaving || !noteData) return;
+    if (!noteData) return;
     const title = titleInput.value.trim();
     const content = noteContent.value;
 
-    if (!content.trim()) return;
+    if (!content.trim()) {
+      dirty = false;
+      clearTimeout(indicatorTimeout);
+      autosaveIndicator.classList.remove('show');
+      return;
+    }
+
+    if (isSaving) {
+      pending = true;
+      return;
+    }
 
     isSaving = true;
 
@@ -176,18 +350,62 @@
       const data = await res.json();
 
       if (data.success) {
-        noteData.title = title;
-        noteData.content = content;
-        showIndicator('Saved');
+        if (noteContent.value === content && titleInput.value.trim() === title) {
+          noteData.title = title;
+          noteData.content = content;
+          dirty = false;
+          showIndicator('Saved');
+        } else {
+          showIndicator('Saving...');
+          clearTimeout(saveTimeout);
+          saveTimeout = setTimeout(autosave, 500);
+        }
+      } else if (res.status === 401) {
+        dirty = false;
+        autosaveIndicator.classList.remove('show');
+        renderProtected();
+        showToast('Password required to continue editing');
       } else {
         showIndicator('Save failed');
+        scheduleRetry();
       }
     } catch {
       showIndicator('Save failed');
+      scheduleRetry();
     } finally {
       isSaving = false;
+      if (pending) {
+        pending = false;
+        clearTimeout(saveTimeout);
+        saveTimeout = setTimeout(autosave, 50);
+      }
     }
   }
+
+  function scheduleRetry() {
+    clearTimeout(retryTimeout);
+    retryTimeout = setTimeout(autosave, 3000);
+  }
+
+  function flushOnExit() {
+    if (!noteData || !dirty || isSaving) return;
+    const title = titleInput.value.trim();
+    const content = noteContent.value;
+    if (!content.trim()) return;
+    try {
+      fetch(`/api/note/${shortId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title, content }),
+        keepalive: true,
+      });
+    } catch {}
+  }
+
+  window.addEventListener('pagehide', flushOnExit);
+  document.addEventListener('visibilitychange', function() {
+    if (document.visibilityState === 'hidden') flushOnExit();
+  });
 
   function showIndicator(msg) {
     autosaveIndicator.textContent = msg;
@@ -199,44 +417,6 @@
       }, 2000);
     }
   }
-
-  unlockBtn.addEventListener('click', async function() {
-    const password = unlockPassword.value;
-    if (!password) return;
-
-    unlockBtn.disabled = true;
-    unlockBtn.textContent = 'Checking...';
-
-    try {
-      const res = await fetch(`/api/note/${shortId}/verify`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ password }),
-      });
-
-      const data = await res.json();
-
-      if (data.success) {
-        noteData.content = data.content;
-        noteData.title = data.title || '';
-        noteData.verified = true;
-        renderNote();
-      } else {
-        unlockError.classList.remove('hidden');
-        unlockPassword.value = '';
-        unlockPassword.focus();
-      }
-    } catch {
-      showToast('Network error');
-    } finally {
-      unlockBtn.disabled = false;
-      unlockBtn.textContent = 'Unlock';
-    }
-  });
-
-  unlockPassword.addEventListener('keydown', function(e) {
-    if (e.key === 'Enter') unlockBtn.click();
-  });
 
   favBtn.addEventListener('click', function() {
     const title = noteData.title || '';
@@ -258,7 +438,7 @@
       const data = await res.json();
 
       if (res.ok) {
-        window.location.href = `/note/${data.short_id}`;
+        window.open(`/note/${data.short_id}`, '_blank');
       } else {
         showToast(data.error || 'Failed to duplicate');
       }
@@ -268,10 +448,26 @@
   });
 
   downloadBtn.addEventListener('click', function() {
+    if (!noteContent.value.trim()) {
+      showToast('Nothing to download');
+      return;
+    }
     window.location.href = `/api/note/${shortId}/download`;
   });
 
-  shareBtn.addEventListener('click', function() {
+  shareBtn.addEventListener('click', async function() {
+    if (!noteContent.value.trim()) {
+      showToast('Nothing to share');
+      return;
+    }
+    if (dirty) {
+      clearTimeout(saveTimeout);
+      saveTimeout = null;
+      while (isSaving) {
+        await new Promise((r) => setTimeout(r, 50));
+      }
+      await autosave();
+    }
     const url = window.location.href;
     const title = encodeURIComponent(noteData.title || 'LinkedPad Note');
     const encodedUrl = encodeURIComponent(url);

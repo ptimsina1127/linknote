@@ -43,21 +43,26 @@
     <a href="/search" title="Search through shared notes">Search</a>
     <a href="/favorites" title="View your favorited notes">Favorites</a>
   </div>
-  <button id="theme-btn" class="toolbar-btn" title="Switch between light and dark theme">🌙</button>
+  <button id="theme-btn" class="toolbar-btn" title="Switch between light and dark theme" aria-label="Switch between light and dark theme" data-icon="moon"></button>
 </nav>
 <main class="editor-page">
   <div class="toolbar">
     <input type="text" id="title-input" class="title-input" placeholder="Title (optional)" maxlength="200" title="Give your note a title">
     <div class="toolbar-right">
       <span class="pw-wrapper">
-        <button id="password-btn" class="toolbar-btn" title="Protect this note with a password">🔒</button>
-        <input type="password" id="password-input" class="pw-inline-input" placeholder="Password (min 4 chars)" maxlength="100">
-        <button id="pw-reveal-btn" class="pw-reveal-btn" title="Show password">👁</button>
+        <button id="password-btn" class="toolbar-btn" title="Protect this note with a password" aria-label="Protect this note with a password" data-icon="lockOpen"></button>
+        <div id="pw-popup" class="pw-popup">
+          <div class="pw-field">
+            <input type="password" id="password-input" class="pw-inline-input" placeholder="Password (min 4 chars)" maxlength="100" aria-label="Password to protect this note">
+            <button id="pw-reveal-btn" class="pw-reveal-btn" title="Show password" aria-label="Show password" data-icon="eye"></button>
+          </div>
+          <button id="pw-ok-btn" class="btn btn-primary pw-ok-btn" title="Set this password">OK</button>
+        </div>
       </span>
-      <button id="mic-btn" class="toolbar-btn" title="Use speech-to-text to enter content (Chrome/Edge only)" style="display:none">🎤</button>
-      <button id="fav-btn" class="toolbar-btn" title="Add this note to your favorites">☆</button>
-      <button id="duplicate-btn" class="toolbar-btn" title="Create a copy of this note">📋</button>
-      <button id="download-btn" class="toolbar-btn" title="Download this note as a text file">⬇</button>
+      <button id="mic-btn" class="toolbar-btn" title="Use speech-to-text to enter content (Chrome/Edge only)" aria-label="Use speech-to-text to enter content" style="display:none" data-icon="mic"></button>
+      <button id="fav-btn" class="toolbar-btn" title="Add this note to your favorites" aria-label="Add this note to your favorites" data-icon="star"></button>
+      <button id="duplicate-btn" class="toolbar-btn" title="Create a copy of this note" aria-label="Create a copy of this note" data-icon="copy"></button>
+      <button id="download-btn" class="toolbar-btn" title="Download this note as a text file" aria-label="Download this note as a text file" data-icon="download"></button>
       <button id="primary-btn" class="btn btn-primary" title="Create a shareable link for this note">Share</button>
     </div>
   </div>
@@ -73,18 +78,27 @@
         <button id="copy-share-link" class="btn btn-primary" title="Copy to clipboard">Copy</button>
       </div>
       <div class="share-buttons">
-        <a id="share-twitter" href="#" target="_blank" rel="noopener" class="btn" title="Share on X (Twitter)">𝕏</a>
-        <a id="share-facebook" href="#" target="_blank" rel="noopener" class="btn" title="Share on Facebook">fb</a>
-        <a id="share-whatsapp" href="#" target="_blank" rel="noopener" class="btn" title="Share on WhatsApp">WA</a>
-        <a id="share-linkedin" href="#" target="_blank" rel="noopener" class="btn" title="Share on LinkedIn">in</a>
-        <a id="share-reddit" href="#" target="_blank" rel="noopener" class="btn" title="Share on Reddit">Reddit</a>
+        <a id="share-twitter" href="#" target="_blank" rel="noopener" class="btn" title="Share on X (Twitter)" aria-label="Share on X (Twitter)" data-icon="twitter"></a>
+        <a id="share-facebook" href="#" target="_blank" rel="noopener" class="btn" title="Share on Facebook" aria-label="Share on Facebook" data-icon="facebook"></a>
+        <a id="share-whatsapp" href="#" target="_blank" rel="noopener" class="btn" title="Share on WhatsApp" aria-label="Share on WhatsApp" data-icon="whatsapp"></a>
+        <a id="share-linkedin" href="#" target="_blank" rel="noopener" class="btn" title="Share on LinkedIn" aria-label="Share on LinkedIn" data-icon="linkedin"></a>
+        <a id="share-reddit" href="#" target="_blank" rel="noopener" class="btn" title="Share on Reddit" aria-label="Share on Reddit" data-icon="reddit"></a>
       </div>
-      <button id="close-share-modal" class="btn" title="Close">Close</button>
+      <button id="close-share-modal" class="btn" title="Close" aria-label="Close" data-icon="x"></button>
+    </div>
+  </div>
+
+  <div id="pw-dialog" class="modal hidden">
+    <div class="modal-content">
+      <h2 id="pw-dialog-title">Password set</h2>
+      <p id="pw-dialog-msg">This note will be protected with the password you entered.</p>
+      <button id="pw-dialog-ok" class="btn btn-primary">OK</button>
     </div>
   </div>
 
   <div id="toast" class="toast hidden"></div>
 
+<script src="/js/icons.js"></script>
 <script src="/js/theme.js"></script>
 <script src="/js/speech.js"></script>
 <script src="/js/favorites.js"></script>

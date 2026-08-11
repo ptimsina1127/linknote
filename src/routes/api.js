@@ -1,12 +1,12 @@
 const express = require('express');
 const rateLimit = require('express-rate-limit');
-const { createNote, getNote, verifyPassword, updateNote, searchNotes } = require('./noteUtils');
+const { createNote, getNote, verifyPassword, updateNote, unlockNote, searchNotes } = require('./noteUtils');
 
 const router = express.Router();
 
 const createLimiter = rateLimit({
   windowMs: 60 * 1000,
-  max: 5,
+  max: 20,
   message: { error: 'Too many note creations. Please wait.' },
   standardHeaders: true,
   legacyHeaders: false,
@@ -14,7 +14,7 @@ const createLimiter = rateLimit({
 
 const updateLimiter = rateLimit({
   windowMs: 60 * 1000,
-  max: 5,
+  max: 60,
   message: { error: 'Too many updates. Please wait.' },
   standardHeaders: true,
   legacyHeaders: false,
@@ -46,6 +46,12 @@ router.post('/note', createLimiter, (req, res) => {
     }
 
     const shortId = createNote(title || '', content, password);
+
+    if (password) {
+      if (!req.session.verified) req.session.verified = {};
+      req.session.verified[shortId] = true;
+    }
+
     res.json({ short_id: shortId });
   } catch (err) {
     console.error('Create error:', err);
@@ -60,22 +66,18 @@ router.get('/note/:id', (req, res) => {
     return res.status(404).json({ error: 'Note not found' });
   }
 
-  let verified = false;
-  if (req.session.verified && req.session.verified[note.short_id]) {
-    verified = true;
-  }
-
   const response = {
     short_id: note.short_id,
     title: note.title,
     created_at: note.created_at,
     is_protected: !!note.is_protected,
-    verified,
+    verified: false,
     content: null,
   };
 
-  if (!note.is_protected || verified) {
+  if (!note.is_protected) {
     response.content = note.content;
+    response.verified = true;
   }
 
   res.json(response);
@@ -102,6 +104,35 @@ router.post('/note/:id/verify', verifyLimiter, (req, res) => {
   } else {
     res.status(401).json({ success: false, error: 'Incorrect password' });
   }
+});
+
+router.post('/note/:id/unlock', verifyLimiter, (req, res) => {
+  const note = getNote(req.params.id);
+
+  if (!note || !note.is_protected) {
+    return res.status(404).json({ error: 'Note not found or not protected' });
+  }
+
+  const { password } = req.body;
+  if (!password) {
+    return res.status(400).json({ error: 'Password required' });
+  }
+
+  if (!verifyPassword(note.password_hash, password)) {
+    return res.status(401).json({ success: false, error: 'Incorrect password' });
+  }
+
+  const removed = unlockNote(note.short_id);
+  if (!removed) {
+    return res.status(500).json({ error: 'Failed to unlock note' });
+  }
+
+  if (!req.session.verified) {
+    req.session.verified = {};
+  }
+  req.session.verified[note.short_id] = true;
+
+  res.json({ success: true, content: note.content, title: note.title });
 });
 
 router.get('/note/:id/meta', (req, res) => {
@@ -149,7 +180,12 @@ router.put('/note/:id', (req, res, next) => { updateLimiter(req, res, next); }, 
     }
 
     const updated = updateNote(req.params.id, title || '', content, password);
+
     if (updated) {
+      if (password) {
+        if (!req.session.verified) req.session.verified = {};
+        req.session.verified[req.params.id] = true;
+      }
       res.json({ success: true });
     } else {
       res.status(500).json({ error: 'Failed to update note' });

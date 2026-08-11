@@ -200,6 +200,14 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: 'Internal server error' });
 });
 
-app.listen(config.port, () => {
+const server = app.listen(config.port, () => {
   console.log(`LinkedPad running on ${config.baseUrl}`);
+});
+
+server.on('error', (err) => {
+  if (err.code === 'EADDRINUSE') {
+    console.error(`Port ${config.port} already in use — stop it with: npm run kill`);
+    process.exit(1);
+  }
+  throw err;
 });

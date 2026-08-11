@@ -92,6 +92,14 @@ function updateNote(shortId, title, content, password) {
   }
 
   const result = db.prepare(sql).run(...params);
+  if (result.changes > 0) return true;
+  return !!db.prepare('SELECT 1 FROM notes WHERE short_id = ?').get(shortId);
+}
+
+function unlockNote(shortId) {
+  const result = db.prepare(
+    "UPDATE notes SET password_hash = NULL, is_protected = 0, updated_at = datetime('now') WHERE short_id = ?"
+  ).run(shortId);
   return result.changes > 0;
 }
 
@@ -100,6 +108,7 @@ module.exports = {
   getNote,
   verifyPassword,
   updateNote,
+  unlockNote,
   getRecentNotes,
   searchNotes,
   getNoteCount,

@@ -121,36 +121,50 @@ body {
   align-items: center;
 }
 
-.pw-inline-input {
+.pw-popup {
   position: absolute;
-  top: calc(100% + 4px);
+  top: calc(100% + 14px);
   left: 0;
-  width: 0;
-  padding: 0;
-  border: none;
-  background: var(--bg);
-  color: var(--text);
-  font-size: 0.85rem;
-  border-radius: var(--radius);
-  transition: width 0.2s, padding 0.2s, border 0.2s;
-  outline: none;
+  display: none;
+  align-items: center;
+  gap: 6px;
   z-index: 10;
 }
 
-.pw-inline-input.visible {
-  width: 160px;
-  padding: 6px 22px 6px 10px;
-  border: 1px solid var(--border);
+.pw-popup.visible { display: flex; }
+
+.pw-field {
+  position: relative;
+  display: flex;
+  align-items: center;
 }
+
+.pw-inline-input {
+  width: 170px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 6px 30px 6px 10px;
+  color: var(--text);
+  font-size: 0.85rem;
+  outline: none;
+}
+
+.pw-inline-input:focus { border-color: var(--text-dim); }
+
+.pw-ok-btn { padding: 6px 12px; font-size: 0.85rem; }
 
 .toolbar-btn {
   background: none;
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 6px 10px;
+  padding: 6px 8px;
   color: var(--text);
   cursor: pointer;
   font-size: 1rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   transition: background 0.2s;
 }
 
@@ -269,8 +283,12 @@ body {
 }
 
 .share-buttons .btn {
-  min-width: 50px;
-  font-size: 0.85rem;
+  min-width: 40px;
+  height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
 }
 
 /* Note view page */
@@ -310,36 +328,40 @@ body {
   flex-shrink: 0;
 }
 
-.unlock-prompt {
+/* Lock screen */
+.note-view-page #lock-screen {
   flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 20px;
 }
-
-.unlock-box {
+.note-view-page #lock-screen.hidden { display: none !important; }
+.lock-card {
   background: var(--surface);
-  padding: 30px;
+  border: 1px solid var(--border);
   border-radius: var(--radius);
-  text-align: center;
-  max-width: 350px;
-  width: 90%;
-}
-
-.unlock-box h2 { margin-bottom: 15px; font-size: 1.1rem; }
-
-.unlock-box input {
+  padding: 32px 28px;
+  max-width: 380px;
   width: 100%;
+  text-align: center;
+}
+.lock-icon { color: var(--primary); margin-bottom: 12px; display: flex; justify-content: center; }
+.lock-icon svg { width: 40px; height: 40px; }
+.lock-card h2 { font-size: 1.2rem; margin-bottom: 8px; }
+.lock-card p { color: var(--text-dim); font-size: 0.9rem; }
+.lock-field { display: flex; gap: 8px; margin-top: 16px; }
+.lock-input {
+  flex: 1;
+  min-width: 0;
+  padding: 10px 12px;
   background: var(--bg);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 10px;
   color: var(--text);
   font-size: 1rem;
-  margin-bottom: 10px;
 }
-
-.unlock-box .btn { width: 100%; }
+.lock-card .error { margin-top: 12px; margin-bottom: 0; }
 
 .error { color: var(--primary); font-size: 0.85rem; margin-top: 8px; }
 .hidden { display: none !important; }
@@ -419,6 +441,9 @@ body {
   border: none;
   color: var(--text-dim);
   padding: 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .note-card .fav-star.active { color: #f1c40f; }
@@ -479,8 +504,9 @@ body {
 /* Password reveal button */
 .pw-reveal-btn {
   position: absolute;
-  right: 2px;
-  bottom: 2px;
+  right: 4px;
+  top: 50%;
+  transform: translateY(-50%);
   background: none;
   border: none;
   cursor: pointer;
@@ -489,6 +515,9 @@ body {
   color: var(--text-dim);
   z-index: 11;
   line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .pw-reveal-btn:hover { color: var(--text); }

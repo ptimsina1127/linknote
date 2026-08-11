@@ -54,8 +54,9 @@
       const isFav = this.isFav(shortId);
       const star = document.createElement('button');
       star.className = 'fav-star' + (isFav ? ' active' : '');
-      star.textContent = isFav ? '★' : '☆';
+      star.innerHTML = isFav ? ICONS.starFilled : ICONS.star;
       star.title = isFav ? 'Remove from favorites' : 'Add to favorites';
+      star.setAttribute('aria-label', isFav ? 'Remove from favorites' : 'Add to favorites');
       star.addEventListener('click', async (e) => {
         e.stopPropagation();
         let title = '';
@@ -67,9 +68,10 @@
           }
         } catch {}
         const nowFav = this.toggle(shortId, title);
-        star.textContent = nowFav ? '★' : '☆';
+        star.innerHTML = nowFav ? ICONS.starFilled : ICONS.star;
         star.className = 'fav-star' + (nowFav ? ' active' : '');
         star.title = nowFav ? 'Remove from favorites' : 'Add to favorites';
+        star.setAttribute('aria-label', nowFav ? 'Remove from favorites' : 'Add to favorites');
         showToast(nowFav ? 'Added to favorites' : 'Removed from favorites');
       });
       container.appendChild(star);
