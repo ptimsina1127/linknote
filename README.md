@@ -286,8 +286,8 @@ CREATE INDEX idx_protected ON notes(is_protected);
 
 ### Local Setup
 ```bash
-git clone https://github.com/ptimsina1127/linknote.git
-cd linknote
+git clone https://github.com/ptimsina1127/LinkedPAD.git
+cd LinkedPAD
 npm install
 cp .env.example .env
 npm start
